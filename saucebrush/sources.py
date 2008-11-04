@@ -6,6 +6,7 @@
 """
 
 import string
+from saucebrush import utils
 
 class CSVSource(object):
     """ Saucebrush source for reading from CSV files.
@@ -25,7 +26,7 @@ class CSVSource(object):
         import csv
         self._dictreader = csv.DictReader(csvfile, fieldnames)
         for _ in xrange(skiprows):
-            self.dictreader.next()
+            self._dictreader.next()
 
     def __iter__(self):
         return self._dictreader
@@ -61,8 +62,8 @@ class FixedWidthFileSource(object):
     def next(self):
         line = self._fwfile.next()
         record = {}
-        for name, range in self._fields_dict.iteritems():
-            record[name] = line[range[0]:range[1]].rstrip(self._fillchars)
+        for name, range_ in self._fields_dict.iteritems():
+            record[name] = line[range[0]:range_[1]].rstrip(self._fillchars)
         return record
 
 
@@ -97,13 +98,14 @@ class HtmlTableSource(object):
 
         # determine the fieldnames
         if not fieldnames:
-            self._fieldnames = [td.string for td in self.rows[0].findAll(('td','th'))]
+            self._fieldnames = [td.string
+                                for td in self._rows[0].findAll(('td','th'))]
         else:
             self._fieldnames = fieldnames
 
-    def process_tr():
+    def process_tr(self):
         for row in self._rows:
-            strings = [string_dig(td) for td in row.findAll('td')]
+            strings = [utils.string_dig(td) for td in row.findAll('td')]
             yield dict(zip(self._fieldnames, strings))
 
     def __iter__(self):
@@ -122,10 +124,11 @@ class DjangoModelSource(object):
         settings.py.
     """
     def __init__(self, dj_settings, app_label, model_name):
-        dbmodel = get_django_model(dj_settings, app_label, model_name)
+        dbmodel = utils.get_django_model(dj_settings, app_label, model_name)
 
         # only get values defined in model (no extra fields from custom manager)
-        self._data = dbmodel.objects.values(*[f.name for f in dbmodel._meta.fields])
+        self._data = dbmodel.objects.values(*[f.name
+                                              for f in dbmodel._meta.fields])
 
     def __iter__(self):
         return iter(self._data)

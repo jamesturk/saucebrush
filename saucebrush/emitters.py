@@ -3,9 +3,7 @@
     it in some manner.
 """
 
-from exceptions import NotImplementedError
 from saucebrush.filters import Filter
-
 
 class Emitter(Filter):
     """ ABC for emitters
@@ -88,10 +86,10 @@ class SqliteEmitter(Emitter):
     """
 
     def __init__(self, dbname, table_name, fieldnames=None):
-        self(SqliteEmitter, self).__init__()
+        super(SqliteEmitter, self).__init__()
         import sqlite3
         self._conn = sqlite3.connect(dbname)
-        self._cursor = self.conn.cursor()
+        self._cursor = self._conn.cursor()
         self._table_name = table_name
         if fieldnames:
             create = "CREATE TABLE IF NOT EXISTS %s (%s)" % (table_name,
@@ -130,10 +128,12 @@ class SqlDumpEmitter(Emitter):
             self._outfile = sys.stderr
         else:
             self._outfile = outfile
-        self._insert_str = "INSERT INTO `%s` (`%s`) VALUES (%%s);\n" % (table_name, '`,`'.join(fieldnames))
+        self._insert_str = "INSERT INTO `%s` (`%s`) VALUES (%%s);\n" % (
+                            table_name, '`,`'.join(fieldnames))
 
     def quote(self, item):
-        return "'%s'" % item.replace("\\","\\\\").replace("'","\\'").replace(chr(0),'0')
+        item = item.replace("\\","\\\\").replace("'","\\'").replace(chr(0),'0')
+        return "'%s'" % item
 
     def emit_record(self, record):
         quoted_data = [self.quote(record[field]) for field in self._fieldnames]

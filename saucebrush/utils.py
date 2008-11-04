@@ -16,7 +16,7 @@ def get_django_model(dj_settings, app_label, model_name):
                            DATABASE_HOST=dj_settings.DATABASE_HOST,
                            INSTALLED_APPS=dj_settings.INSTALLED_APPS)
     from django.db.models import get_model
-    dbmodel = get_model(app_label, model_name)
+    return get_model(app_label, model_name)
 
 
 def string_dig(element, joiner=''):
@@ -29,7 +29,8 @@ def string_dig(element, joiner=''):
     if element.string:
         return element.string
     else:
-        return joiner.join([string_dig(child) for child in element.findAll(True)])
+        return joiner.join([string_dig(child)
+                            for child in element.findAll(True)])
 
 
 def flatten(item, prefix=''):

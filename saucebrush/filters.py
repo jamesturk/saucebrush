@@ -7,7 +7,6 @@
     (or process_field for FieldFilter).
 """
 
-from exceptions import NotImplementedError
 from saucebrush import utils
 
 ######################
@@ -99,8 +98,8 @@ class FieldModifier(FieldFilter):
         return self._filter_func(item)
 
     def __unicode__(self):
-        return '%s( %s, %s )' % (self.__class__.__name__, str(self._target_keys),
-                                 str(self._filter_func))
+        return '%s( %s, %s )' % (self.__class__.__name__,
+                                 str(self._target_keys), str(self._filter_func))
 
 
 class FieldRemover(Filter):
@@ -138,7 +137,7 @@ class FieldMerger(Filter):
         self._merge_func = merge_func
 
     def process_record(self, record):
-        for to_col,from_cols in self._field_mapping.iteritems():
+        for to_col, from_cols in self._field_mapping.iteritems():
             values = [record.pop(col, None) for col in from_cols]
             record[to_col] = self._merge_func(*values)
         return record
@@ -204,13 +203,13 @@ class Splitter(Filter):
 
             # if a dict, use process_record directly
             if isinstance(subrecord, dict):
-                for filter in filters:
-                    subrecord = filter.process_record(subrecord)
+                for filter_ in filters:
+                    subrecord = filter_.process_record(subrecord)
 
             # if a list or tuple, use __call__
             elif isinstance(subrecord, (list, tuple)):
-                for filter in filters:
-                    subrecord = filter(subrecord)
+                for filter_ in filters:
+                    subrecord = filter_(subrecord)
                 subrecord = [r for r in subrecord]  # unchain generators
 
             # place back from whence it came
@@ -231,18 +230,6 @@ class Flattener(Filter):
     
     def __init__(self):
         super(Flattener, self).__init__()
-    
-    '''def process_field(self, item):
-        # create a list of dictionaries with concatenated keys
-        retlist = []
-        for subitem in item:
-            newitem = {}
-            for key1,subdict in subitem.iteritems():
-                for key2,value in subdict.iteritems():
-                    newitem[key1+'_'+key2] = value
-            retlist.append(newitem)
-        return retlist
-    '''
     
     def process_record(self, record):
         return utils.flatten(record)
