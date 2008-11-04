@@ -45,21 +45,21 @@ def process_fec_year(year):
     source = FixedWidthFileSource(open('%s/foiacm.dta' % year), CM_FIELDS)
     #sqlite = SqliteOutput('fec%s.sqlite' % year, 'committee', [f[0] for f in CM_FIELDS if f[0] != 'filler'])
     emit_mysql = SqlDumpEmitter(open('fec%s.sql' % year,'a'), 'committee', [f[0] for f in CM_FIELDS if f[0] != 'filler'])
-    run_recipe(source, [emit_mysql])
+    run_recipe(source, emit_mysql)
 
     # candidate
     source = FixedWidthFileSource(open('%s/foiacn.dta' % year), CN_FIELDS)
     fieldremover = FieldRemover(('fillerA', 'fillerB'))
     #sqlite = SqliteOutput('fec%s.sqlite' % year, 'candidate', [f[0] for f in CN_FIELDS if f[0] != 'filler'])
     emit_mysql = SqlDumpEmitter(open('fec%s.sql' % year,'a'), 'candidate', [f[0] for f in CN_FIELDS if not f[0].startswith('filler')])
-    run_recipe(source, [fieldremover, emit_mysql])
+    run_recipe(source, fieldremover, emit_mysql)
 
     # contributions
     source = FixedWidthFileSource(open('%s/itcont.dta' % year), INDIV_FIELDS)
     decobolizer = FieldModifier(('amount', ), fix_cobol_number)
     #sqlite = SqliteOutput('fec%s.sqlite' % year, 'contribution', [f[0] for f in INDIV_FIELDS if f[0] != 'filler'])
     emit_mysql = SqlDumpEmitter(open('fec%s.sql' % year,'a'), 'contribution', [f[0] for f in INDIV_FIELDS if f[0] != 'filler'])
-    run_recipe(source, [decobolizer, emit_mysql])
+    run_recipe(source, decobolizer, emit_mysql)
 
 if __name__=='__main__':
     process_fec_year(2008)

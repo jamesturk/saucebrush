@@ -8,6 +8,7 @@
 """
 
 from exceptions import NotImplementedError
+from saucebrush import utils
 
 ######################
 ## Abstract Filters ##
@@ -156,6 +157,9 @@ class FieldAdder(Filter):
 
         from itertools import count
         FieldAdder('id', count)
+        
+        would yield a new column named id that uses the itertools count iterable
+        to create sequentially numbered ids.
     """
 
     def __init__(self, field_name, field_value):
@@ -214,6 +218,35 @@ class Splitter(Filter):
         return record
 
 
+class Flattener(Filter):
+    """ Collapse a set of similar dictionaries into a list.
+    
+        Takes a dictionary of keys and flattens the key names:
+        
+        addresses = [{'addresses': [{'address': {'state':'NC', 'street':'146 shirley drive'}},
+                            {'address': {'state':'NY', 'street':'3000 Winton Rd'}}]}]
+        flattener = Flattener(['addresses'])
+    """
+        
+    
+    def __init__(self):
+        super(Flattener, self).__init__()
+    
+    '''def process_field(self, item):
+        # create a list of dictionaries with concatenated keys
+        retlist = []
+        for subitem in item:
+            newitem = {}
+            for key1,subdict in subitem.iteritems():
+                for key2,value in subdict.iteritems():
+                    newitem[key1+'_'+key2] = value
+            retlist.append(newitem)
+        return retlist
+    '''
+    
+    def process_record(self, record):
+        return utils.flatten(record)
+    
 
 ###########################
 ## Commonly Used Filters ##

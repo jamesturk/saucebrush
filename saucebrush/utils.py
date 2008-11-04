@@ -32,6 +32,28 @@ def string_dig(element, joiner=''):
         return joiner.join([string_dig(child) for child in element.findAll(True)])
 
 
+def flatten(item, prefix=''):
+    """
+        Flatten nested dictionary into one with its keys concatenated together.
+        
+        >>> flatten({'a':1, 'b':{'c':2}, 'd':[{'e':{'r':7}}, {'e':5}],
+                    'f':{'g':{'h':6}}})
+        {'a': 1, 'b_c': 2, 'd': [{'e_r': 7}, {'e': 5}], 'f_g_h': 6}
+    """
+    if isinstance(item, dict):
+        # don't prepend a leading _
+        if prefix != '':
+            prefix += '_'
+        retval = {}
+        for key, value in item.iteritems():
+            retval.update(flatten(value, prefix + key))
+        return retval
+    elif isinstance(item, (tuple, list)):
+        return {prefix: [flatten(i) for i in item]}
+    else:
+        return {prefix: item}
+
+
 def dotted_key_lookup(dict_, dotted_key, default=KeyError, separator='.'):
     """
         Do a lookup within dict_ by the various elements of dotted_key.
