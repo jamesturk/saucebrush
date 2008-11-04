@@ -1,6 +1,6 @@
 import filters, emitters, sources, utils
 
-def run_recipe(source, filters):
+def run_recipe(source, *filters):
     # connect datapath
     data = source
     for filter in filters:
