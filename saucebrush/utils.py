@@ -61,8 +61,8 @@ def dotted_key_lookup(dict_, dotted_key, default=KeyError, separator='.'):
     """
         Do a lookup within dict_ by the various elements of dotted_key.
 
-        Optionally specifiy a default to return if key does not exist (similar
-        to default
+        Optionally specify a default to return if key does not exist (similar
+        to default)
 
         >>> d = {'a': {'b': {'c': 3} } }
         >>> dotted_key_lookup(d, 'a.b.c')
@@ -87,6 +87,37 @@ def dotted_key_lookup(dict_, dotted_key, default=KeyError, separator='.'):
         val = default
     return val
 
+def dotted_key_pop(dict_, dotted_key, default=KeyError, separator='.'):
+    """
+        Delete a value within dict_ by the various elements of dotted_key.
+    """
+    val = dict_
+    try:
+        key_parts = dotted_key.split(separator)
+        for key in key_parts[:-1]:
+            if isinstance(val, dict):
+                val = val[key]
+            elif isinstance(val, (list,tuple)):
+                val = val[int(key)]
+            else:
+                val = getattr(val, key)
+
+        # now with just the final part of the key
+        key = key_parts[-1]
+        if isinstance(val, dict):
+            retval = val[key]
+            del val[key]
+        elif isinstance(val, (list,tuple)):
+            retval = val[int(key)]
+            del val[int(key)]
+        else:
+            retval = getattr(val, key)
+            delattr(val, key)
+    except (KeyError, IndexError, AttributeError):
+        if default is KeyError:
+            raise
+        retval = default
+    return retval
 
 def dotted_key_set(dict_or_list, dotted_key, value, separator='.'):
     """
@@ -109,7 +140,10 @@ def dotted_key_set(dict_or_list, dotted_key, value, separator='.'):
             if i == len(keys)-1:
                 dict_or_list[key] = value
             else:
-                dict_or_list = dict_or_list.setdefault(key, {})
+                try:
+                    dict_or_list = dict_or_list[key]
+                except KeyError:
+                    break
                 
         # if current location is a list: call dotted_key_set on each element
         elif isinstance(dict_or_list, (tuple, list)):

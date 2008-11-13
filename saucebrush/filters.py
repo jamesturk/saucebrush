@@ -9,6 +9,7 @@
 
 from saucebrush import utils
 import re
+import time
 
 ######################
 ## Abstract Filters ##
@@ -225,7 +226,27 @@ class FieldCopier(Filter):
             srcval = utils.dotted_key_lookup(record, source)
             utils.dotted_key_set(record, dest, srcval)
         return record
+
+class FieldRenamer(Filter):
+    """ Filter that renames one field to another.
     
+        Takes a dictionary mapping destination keys to source keys.
+    
+    """
+    def __init__(self, rename_mapping):
+        super(FieldRenamer, self).__init__()
+        self._rename_mapping = rename_mapping
+        
+    def process_record(self, record):
+        # mapping is dest:source
+        for dest, source in self._rename_mapping.iteritems():
+            try:
+                srcval = utils.dotted_key_pop(record, source)
+                utils.dotted_key_set(record, dest, srcval)
+            except KeyError:
+                # silently pass if source key didn't exist
+                pass
+        return record    
 
 class Splitter(Filter):
     """ Filter that splits nested data into different paths.
@@ -333,6 +354,19 @@ class PhoneNumberCleaner(FieldFilter):
             item = self._number_format % tuple(nums)
         return item
 
+class DateCleaner(FieldFilter):
+    """ Filter that cleans dates to match a given format.
+    
+        Takes a list of target keys and to and from formats in strftime format.
+    """
+    def __init__(self, keys, from_format, to_format):
+        super(DateCleaner, self).__init__(keys)
+        self._from_format = from_format
+        self._to_format = to_format
+        
+    def process_field(self, item):
+        return time.strftime(self._to_format,
+                             time.strptime(item, self._from_format))
 
 class NameCleaner(Filter):
     """ Filter that splits names into a first, last, and middle name field.

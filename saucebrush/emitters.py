@@ -156,7 +156,9 @@ class DjangoModelEmitter(Emitter):
     def __init__(self, dj_settings, app_label, model_name):
         super(DjangoModelEmitter, self).__init__()
         from saucebrush.utils import get_django_model
-        self.dbmodel = get_django_model(dj_settings, app_label, model_name)
+        self._dbmodel = get_django_model(dj_settings, app_label, model_name)
+        if not self._dbmodel:
+            raise Exception("No such model: %s %s" % (app_label, model_name))
 
     def emit_record(self, record):
-        self.dbmodel.objects.create(**record)
+        self._dbmodel.objects.create(**record)
