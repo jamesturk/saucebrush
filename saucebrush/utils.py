@@ -19,7 +19,7 @@ def get_django_model(dj_settings, app_label, model_name):
     return get_model(app_label, model_name)
 
 
-def string_dig(element, joiner=''):
+def string_dig(element, separator=''):
     """
         Dig into BeautifulSoup HTML elements looking for inner strings.
 
@@ -29,11 +29,11 @@ def string_dig(element, joiner=''):
     if element.string:
         return element.string
     else:
-        return joiner.join([string_dig(child)
+        return separator.join([string_dig(child)
                             for child in element.findAll(True)])
 
 
-def flatten(item, prefix=''):
+def recursive_flatten(item, prefix=''):
     """
         Flatten nested dictionary into one with its keys concatenated together.
         
@@ -41,19 +41,21 @@ def flatten(item, prefix=''):
                     'f':{'g':{'h':6}}})
         {'a': 1, 'b_c': 2, 'd': [{'e_r': 7}, {'e': 5}], 'f_g_h': 6}
     """
+    
+    # update dictionaries recursively
+    
     if isinstance(item, dict):
         # don't prepend a leading _
         if prefix != '':
             prefix += '_'
         retval = {}
         for key, value in item.iteritems():
-            retval.update(flatten(value, prefix + key))
+            retval.update(recursive_flatten(value, prefix + key))
         return retval
     elif isinstance(item, (tuple, list)):
-        return {prefix: [flatten(i) for i in item]}
+        return {prefix: [recursive_flatten(i) for i in item]}
     else:
         return {prefix: item}
-
 
 def dotted_key_lookup(dict_, dotted_key, default=KeyError, separator='.'):
     """
@@ -69,7 +71,6 @@ def dotted_key_lookup(dict_, dotted_key, default=KeyError, separator='.'):
         -1
         >>> dotted_key_lookup(d, 'a|b|c', separator='|')
         3
-        >>> dotted_key_lookup(d, '
     """
     val = dict_
     try:
@@ -85,3 +86,33 @@ def dotted_key_lookup(dict_, dotted_key, default=KeyError, separator='.'):
             raise
         val = default
     return val
+
+
+def dotted_key_set(dict_or_list, dotted_key, value, separator='.'):
+    """
+        Set a value within dict_ using a dotted_key.
+        
+        >>> d = {}
+        >>> dotted_key_set(d, 'a.b.c', 123}
+        >>> d
+        {'a': {'b': {'c': 123}}}
+    """
+    
+    # split key into composite parts
+    keys = dotted_key.split(separator)
+    
+    for i,key in enumerate(keys):
+        
+        # if current location is a dictionary: traverse inward until @ last key
+        # set value when last key is reached
+        if isinstance(dict_or_list, dict):
+            if i == len(keys)-1:
+                dict_or_list[key] = value
+            else:
+                dict_or_list = dict_or_list.setdefault(key, {})
+                
+        # if current location is a list: call dotted_key_set on each element
+        elif isinstance(dict_or_list, (tuple, list)):
+            newkey = separator.join(keys[i:])
+            for item in dict_or_list:
+                dotted_key_set(item, newkey, value, separator)

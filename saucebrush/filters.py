@@ -8,6 +8,7 @@
 """
 
 from saucebrush import utils
+import re
 
 ######################
 ## Abstract Filters ##
@@ -66,18 +67,46 @@ class FieldFilter(Filter):
 
     def process_record(self, record):
         """ Calls process_field on all keys passed to __init__. """
+        
         for key in self._target_keys:
-            record[key] = self.process_field(record[key])
+            try:
+                item = record[key]
+                record[key] = self.process_field(item)
+            except KeyError:
+                # probably want to have a boolean to flag missing fields
+                pass
         return record
 
     def process_field(self, item):
         """ Given a value, return the value that it should be replaced with. """
+        
         raise NotImplementedError('process_field not defined in ' +
                                   self.__class__.__name__)
 
     def __unicode__(self):
         return '%s( %s )' % (self.__class__.__name__, str(self._target_keys))
 
+class ConditionalFilter(YieldFilter):
+    """ ABC for filters that only pass through records meeting a condition.
+    
+        All derived filters must provide a test_record(self, record) that
+        returns True or False -- True indicating that the record should be
+        passed through, and False preventing pass through.
+    """
+    
+    def __init__(self):
+        super(ConditionalFilter, self).__init__()
+        
+    def process_record(self, record):
+        """ Yields all records for which self.test_record is true """
+        
+        if self.test_record(record):
+            yield record
+
+    def test_record(self, record):
+        """ Given a record, return True iff it should be passed on """
+        raise NotImplementedError('test_record not defined in ' +
+                                  self.__class__.__name__)
 
 #####################
 ## Generic Filters ##
@@ -180,6 +209,23 @@ class FieldAdder(Filter):
         return '%s( %s, %s )' % (self.__class__.__name__, self._field_name,
                              str(self._field_value))
 
+class FieldCopier(Filter):
+    """ Filter that copies one field to another.
+    
+        Takes a dictionary mapping destination keys to source keys.
+    
+    """
+    def __init__(self, copy_mapping):
+        super(FieldCopier, self).__init__()
+        self._copy_mapping = copy_mapping
+        
+    def process_record(self, record):
+        # mapping is dest:source
+        for dest, source in self._copy_mapping.iteritems():
+            srcval = utils.dotted_key_lookup(record, source)
+            utils.dotted_key_set(record, dest, srcval)
+        return record
+    
 
 class Splitter(Filter):
     """ Filter that splits nested data into different paths.
@@ -199,7 +245,11 @@ class Splitter(Filter):
     def process_record(self, record):
         for key, filters in self._split_mapping.iteritems():
 
-            subrecord = record[key]
+            # if the key doesn't exist -- move on to next key
+            try:
+                subrecord = record[key]
+            except KeyError:
+                continue
 
             # if a dict, use process_record directly
             if isinstance(subrecord, dict):
@@ -217,23 +267,47 @@ class Splitter(Filter):
         return record
 
 
-class Flattener(Filter):
+class Flattener(FieldFilter):
     """ Collapse a set of similar dictionaries into a list.
     
         Takes a dictionary of keys and flattens the key names:
-        
+
         addresses = [{'addresses': [{'address': {'state':'NC', 'street':'146 shirley drive'}},
                             {'address': {'state':'NY', 'street':'3000 Winton Rd'}}]}]
         flattener = Flattener(['addresses'])
+
+        would yield:
+
+        {'addresses': [{'state': 'NC', 'street': '146 shirley drive'},
+                       {'state': 'NY', 'street': '3000 Winton Rd'}]}
     """
-        
+    def __init__(self, keys):
+        super(Flattener, self).__init__(keys)
+    
+    def process_field(self, item):
+        result = []
+        for d in item:
+            rec = {}
+            for values in d.values():
+                rec.update(values)
+            result.append(rec)
+        return result
+    
+class Unique(ConditionalFilter):
+    """ Filter that ensures that all records passing through are unique.
+    """
     
     def __init__(self):
-        super(Flattener, self).__init__()
-    
-    def process_record(self, record):
-        return utils.flatten(record)
-    
+        super(Unique, self).__init__()
+        self._seen = set()
+        
+    def test_record(self, record):
+        record_hash = hash(repr(record))
+        if record_hash not in self._seen:
+            self._seen.add(record_hash)
+            return True
+        else:
+            return False
 
 ###########################
 ## Commonly Used Filters ##
@@ -249,7 +323,6 @@ class PhoneNumberCleaner(FieldFilter):
         would format the phone & fax columns to 555-123-4567 format.
     """
     def __init__(self, keys, number_format='%s%s%s.%s%s%s.%s%s%s%s'):
-        import re
         super(PhoneNumberCleaner, self).__init__(keys)
         self._number_format = number_format
         self._num_re = re.compile('\d')
@@ -259,3 +332,55 @@ class PhoneNumberCleaner(FieldFilter):
         if len(nums) == 10:
             item = self._number_format % tuple(nums)
         return item
+
+
+class NameCleaner(Filter):
+    """ Filter that splits names into a first, last, and middle name field.
+
+        Takes a list of target keys.
+
+        PhoneNumberCleaner( ('phone','fax'),
+                            number_format='%s%s%s-%s%s%s-%s%s%s%s')
+        would format the phone & fax columns to 555-123-4567 format.
+    """
+    
+    # first middle? last suffix?
+    FIRST_LAST = re.compile('''^\s*(?:(?P<firstname>\w+)(?:\.?)
+                                \s+(?:(?P<middlename>\w+)\.?\s+)?
+                                (?P<lastname>[A-Za-z'-]+))
+                                (?:\s+(?P<suffix>JR\.?|II|III|IV))?
+                                \s*$''', re.VERBOSE | re.IGNORECASE)
+    
+    # last, first middle? suffix?
+    LAST_FIRST = re.compile('''^\s*(?:(?P<lastname>[A-Za-z'-]+),
+                                \s+(?P<firstname>\w+)(?:\.?)
+                                (?:\s+(?P<middlename>\w+)\.?)?)
+                                (?:\s+(?P<suffix>JR\.?|II|III|IV))?
+                                \s*$''', re.VERBOSE | re.IGNORECASE)
+    
+    def __init__(self, keys, name_formats=None):
+        super(NameCleaner, self).__init__()
+        self._keys = keys
+        if name_formats:
+            self._name_formats = name_formats
+        else:
+            self._name_formats = [self.FIRST_LAST, self.LAST_FIRST]
+
+    def process_record(self, record):
+        # run for each key (not using a FieldFilter due to multi-field output)
+        for key in self._keys:
+            name = record[key]
+            
+            # check if key matches any formats
+            for format in self._name_formats:
+                match = format.match(name)
+                
+                # if there is a match, remove original name and add pieces
+                if match:
+                    record.pop(key)
+                    for k,v in match.groupdict().iteritems():
+                        record[k] = v
+                    break
+            # can add else statement here to log non-names
+            
+        return record
