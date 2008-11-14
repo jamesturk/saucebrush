@@ -12,7 +12,7 @@ def process_sopr_filing(sopr_xml_file):
     from sunlightapi import settings as DJ_SETTINGS
     DJ_APPLABEL = 'lobbyists'
     
-    saucebrush.run_recipe(lobbyists.parse_filings(sopr_xml_file),
+    saucebrush.run_recipe_multitasking(lobbyists.parse_filings(sopr_xml_file),
         FieldRemover(['govt_entities', 'affiliated_orgs']),
         Flattener(['issues', 'lobbyists']),
         FieldCopier({'issues.filing_id': 'filing.id',
