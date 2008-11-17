@@ -313,7 +313,18 @@ class Flattener(FieldFilter):
                 rec.update(values)
             result.append(rec)
         return result
+
     
+class DictFlattener(Filter):
+    def __init__(self, keys, separator='_'):
+        super(DictFlattener, self).__init__()
+        self._keys = keys
+        self._separator = separator
+    
+    def process_record(self, record):
+        utils.flatten(record, keys=self._keys, separator=self._separator)
+
+
 class Unique(ConditionalFilter):
     """ Filter that ensures that all records passing through are unique.
     """

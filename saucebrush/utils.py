@@ -33,7 +33,7 @@ def string_dig(element, separator=''):
                             for child in element.findAll(True)])
 
 
-def recursive_flatten(item, prefix=''):
+def flatten(item, prefix='', separator='_', keys=None):
     """
         Flatten nested dictionary into one with its keys concatenated together.
         
@@ -47,14 +47,18 @@ def recursive_flatten(item, prefix=''):
     if isinstance(item, dict):
         # don't prepend a leading _
         if prefix != '':
-            prefix += '_'
+            prefix += separator
         retval = {}
         for key, value in item.iteritems():
-            retval.update(recursive_flatten(value, prefix + key))
+            if (not keys) or (key in keys):
+                retval.update(flatten(value, prefix + key, separator, keys))
+            else:
+                retval[prefix + key] = value
         return retval
-    elif isinstance(item, (tuple, list)):
-        return {prefix: [recursive_flatten(i) for i in item]}
+    #elif isinstance(item, (tuple, list)):
+    #    return {prefix: [flatten(i, prefix, separator, keys) for i in item]}
     else:
+        print item, prefix
         return {prefix: item}
 
 def dotted_key_lookup(dict_, dotted_key, default=KeyError, separator='.'):
