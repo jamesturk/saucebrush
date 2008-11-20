@@ -60,6 +60,12 @@ def flatten(item, prefix='', separator='_', keys=None):
     else:
         print item, prefix
         return {prefix: item}
+    
+def str_or_list(obj):
+    if isinstance(obj, str):
+        return [obj]
+    else:
+        return obj
 
 def dotted_key_lookup(dict_, dotted_key, default=KeyError, separator='.'):
     """
