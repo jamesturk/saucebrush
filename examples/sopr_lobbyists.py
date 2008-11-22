@@ -12,35 +12,39 @@ def process_sopr_filing(sopr_xml_file):
     from sunlightapi import settings as DJ_SETTINGS
     DJ_APPLABEL = 'lobbyists'
     
-    saucebrush.run_recipe_multitasking(lobbyists.parse_filings(sopr_xml_file),
-        FieldRemover(['govt_entities', 'affiliated_orgs']),
+    saucebrush.run_recipe(lobbyists.parse_filings(sopr_xml_file),
+        # flatten non-list dictionaries & clean up some fields
+        DictFlattener(['filing', 'client', 'registrant']),
+        FieldRemover(['govt_entities', 'affiliated_orgs', 'foreign_entities',
+                      'client_state_or_local_gov', 'client_status',
+                      'filing_affiliated_orgs_url']),
+        FieldRenamer({'filing_date': 'filing_filing_date'}),
+        
+        # process names & dates
+        FieldAdder('client_contact_name', ''),
+        FieldAdder('registrant_name', ''),
+        NameCleaner('client_contact_name', prefix='client_', nomatch_name='client_raw_contact_name'),
+        NameCleaner('registrant_name', prefix='registrant_', nomatch_name='registrant_raw_name'),
+        FieldModifier('filing_date', lambda x: x.split('.')[0]),
+        DateCleaner('filing_date', from_format='%Y-%m-%dT%H:%M:%S', to_format='%Y-%m-%d'),
+        
+        # flatten lists
         Flattener(['issues', 'lobbyists']),
-        FieldCopier({'issues.filing_id': 'filing.id',
-                     'client.filing_id': 'filing.id',
-                     'lobbyists.filing_id': 'filing.id',
-                     'registrant.filing_id': 'filing.id'}),
+        FieldCopier({'issues.filing_id': 'filing_id',
+                     'lobbyists.filing_id': 'filing_id'}),
+        
+        # handle lists
         saucebrush.filters.Splitter({
-          'client':[FieldRemover(['state_or_local_gov', 'status']),
-                    NameCleaner(['contact_name']),
-                    FieldRenamer({'raw_contact_name': 'contact_name'}),
-                    DjangoModelEmitter(DJ_SETTINGS, DJ_APPLABEL, 'client')
-                    ],
-          'filing':[FieldRemover(['affiliated_orgs_url']),
-                    DateCleaner(['filing_date'], from_format='%Y-%m-%dT00:00:00', to_format='%Y-%m-%d'),
-                    DjangoModelEmitter(DJ_SETTINGS, DJ_APPLABEL, 'filing')
-                    ],
           'issues':[DjangoModelEmitter(DJ_SETTINGS, DJ_APPLABEL, 'issue')],
           'lobbyists':[FieldRemover(['indicator', 'status']),
                        NameCleaner(['name']),
                        FieldRenamer({'raw_name': 'name'}),
-                       Unique(),
+                       Unique(),    # remove some duplicate lobbyists on a form
                        DjangoModelEmitter(DJ_SETTINGS, DJ_APPLABEL, 'lobbyist')
                        ],
-          'registrant':[NameCleaner(['name']),
-                        FieldRenamer({'raw_name': 'name'}),
-                        DjangoModelEmitter(DJ_SETTINGS, DJ_APPLABEL, 'registrant')
-                        ],
         }),
+        FieldRemover(['issues', 'lobbyists']),
+        DjangoModelEmitter(DJ_SETTINGS, DJ_APPLABEL, 'filing')
     )
     
 if __name__ == '__main__':
