@@ -197,10 +197,11 @@ class FieldAdder(Filter):
         self._field_value = field_value
 
     def process_record(self, record):
-        if callable(self._field_value):
-            record[self._field_name] = self._field_value()
-        else:
-            record[self._field_name] = self._field_value
+        if self._field_name not in record:
+            if callable(self._field_value):
+                record[self._field_name] = self._field_value()
+            else:
+                record[self._field_name] = self._field_value
         return record
 
     def __unicode__(self):

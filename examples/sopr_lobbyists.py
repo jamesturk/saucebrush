@@ -9,7 +9,7 @@ from saucebrush.emitters import DjangoModelEmitter, DebugEmitter
 import lobbyists
 
 def process_sopr_filing(sopr_xml_file):
-    from sunlightapi import settings as DJ_SETTINGS
+    from sunlightapi import live_settings as DJ_SETTINGS
     DJ_APPLABEL = 'lobbyists'
     
     saucebrush.run_recipe(lobbyists.parse_filings(sopr_xml_file),
@@ -22,9 +22,7 @@ def process_sopr_filing(sopr_xml_file):
         
         # process names & dates
         FieldAdder('client_contact_name', ''),
-        FieldAdder('registrant_name', ''),
-        NameCleaner('client_contact_name', prefix='client_', nomatch_name='client_raw_contact_name'),
-        NameCleaner('registrant_name', prefix='registrant_', nomatch_name='registrant_raw_name'),
+        NameCleaner('client_contact_name', prefix='client_contact_', nomatch_name='client_raw_contact_name'),
         FieldModifier('filing_date', lambda x: x.split('.')[0]),
         DateCleaner('filing_date', from_format='%Y-%m-%dT%H:%M:%S', to_format='%Y-%m-%d'),
         
@@ -37,8 +35,7 @@ def process_sopr_filing(sopr_xml_file):
         saucebrush.filters.Splitter({
           'issues':[DjangoModelEmitter(DJ_SETTINGS, DJ_APPLABEL, 'issue')],
           'lobbyists':[FieldRemover(['indicator', 'status']),
-                       NameCleaner(['name']),
-                       FieldRenamer({'raw_name': 'name'}),
+                       NameCleaner('name', nomatch_name='raw_name'),
                        Unique(),    # remove some duplicate lobbyists on a form
                        DjangoModelEmitter(DJ_SETTINGS, DJ_APPLABEL, 'lobbyist')
                        ],
