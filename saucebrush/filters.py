@@ -382,9 +382,9 @@ class NameCleaner(Filter):
 
         Takes a list of target keys.
 
-        PhoneNumberCleaner( ('phone','fax'),
-                            number_format='%s%s%s-%s%s%s-%s%s%s%s')
-        would format the phone & fax columns to 555-123-4567 format.
+        NameCleaner( ('name', ), nomatch_name='raw_name')
+        would attempt to split 'name' into firstname, middlename, lastname,
+        and suffix columns, and if it did not fit would place it in raw_name
     """
     
     # first middle? last suffix?

@@ -25,19 +25,19 @@ def run_recipe(source, *filter_args):
             pass    # don't care if there isn't a done method
 
 
-##### allow selection between threading/processing #####
+# experiment with threading - do not use
 
-#from threading import Thread as TaskType
-#from Queue import Queue
-#from threading import activeCount as active_tasks
+from threading import Thread as TaskType
+from Queue import Queue
+from threading import activeCount as active_tasks
 
-from processing import Process as TaskType
-from processing import Queue
-def active_tasks():
-    from processing import activeChildren
-    return len(activeChildren())
+# uncomment to use processing instead of threading
+#from processing import Process as TaskType
+#from processing import Queue
+#def active_tasks():
+#    from processing import activeChildren
+#    return len(activeChildren())
 
-########################################################
 
 class FilterThread(TaskType):
     __create_count = 0
