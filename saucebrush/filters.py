@@ -33,9 +33,11 @@ class Filter(object):
         raise NotImplementedError('process_record not defined in ' +
                                   self.__class__.__name__)
 
-    def __call__(self, source):
+    def __call__(self, recipe, source):
         for record in source:
-            yield self.process_record(record)
+            result = self.process_record(record)
+            if not result is None:
+                yield result
 
 
 class YieldFilter(Filter):
