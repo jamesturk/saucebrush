@@ -11,12 +11,20 @@ class Recipe(filters.Filter):
         self.rejected = []
     
     def get_filters(self):
+        
         filters = []
+        
         for filter_ in self._filter_args:
+            
+            # check to see if this is a filter or a recipe
+            
             if hasattr(filter_, 'get_filters'):
+                # load filters from child recipe
                 filters.extend(filter_.get_filters())
+                
             else:
                 filters.append(filter_)
+                
         return filters
     
     def run(self, source):
@@ -39,14 +47,14 @@ class Recipe(filters.Filter):
                 filter_.done()
             except AttributeError:
                 pass    # don't care if there isn't a done method
-        
-        return self
 
 def run_recipe(source, *filter_args):
     """ Process data, taking it from a source and applying any number of filters
     """
     
-    return Recipe(*filter_args).run(source)
+    r = Recipe(*filter_args)
+    r.run(source)
+    return r
 
 
 # experiment with threading - do not use
