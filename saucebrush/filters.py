@@ -33,7 +33,12 @@ class Filter(object):
         raise NotImplementedError('process_record not defined in ' +
                                   self.__class__.__name__)
 
+    def reject_record(self, record, message):
+        if hasattr(self, '_recipe'):
+            self._recipe.rejected.append((record, message))
+
     def __call__(self, recipe, source):
+        self._recipe = recipe
         for record in source:
             result = self.process_record(record)
             if not result is None:
