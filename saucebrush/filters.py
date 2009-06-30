@@ -55,7 +55,8 @@ class YieldFilter(Filter):
     def __init__(self):
         super(YieldFilter, self).__init__()
 
-    def __call__(self, source):
+    def __call__(self, recipe, source):
+        self._recipe = recipe
         for record in source:
             for result in self.process_record(record):
                 yield result
