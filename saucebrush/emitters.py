@@ -171,11 +171,14 @@ class MongoDBEmitter(Emitter):
         be inserted are required parameters. The host and port are optional,
         defaulting to 'localhost' and 27017, repectively.
     """
-    def __init__(self, database, collection, host='localhost', port=27017):
+    def __init__(self, database, collection, host='localhost', port=27017, drop_collection=False):
         super(MongoDBEmitter, self).__init__()
         from pymongo.connection import Connection
         conn = Connection(host, port)
-        self.collection = conn[database][collection]
+        db = conn[database]
+        if drop_collection:
+            db.drop_collection(collection)
+        self.collection = db[collection]
     
     def emit_record(self, record):
         self.collection.insert(record)
