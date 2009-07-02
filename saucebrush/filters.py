@@ -347,6 +347,21 @@ class Unique(ConditionalFilter):
         else:
             return False
 
+class UnicodeFilter(Filter):
+    """ Convert all str elements in the record to Unicode.
+    """
+    
+    def __init__(self, encoding='utf-8', errors='ignore'):
+        super(UnicodeFilter, self).__init__()
+        self._encoding = encoding
+        self._errors = errors
+    
+    def process_record(self, record):
+        for key, value in record.iteritems():
+            if isinstance(value, str):
+                record[key] = unicode(value, self._encoding, self._errors)
+        return record
+
 ###########################
 ## Commonly Used Filters ##
 ###########################
