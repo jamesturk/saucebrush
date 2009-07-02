@@ -149,7 +149,7 @@ class DjangoModelEmitter(Emitter):
         Takes a django settings file, app label and model name and uses django
         to insert the records into the appropriate table.
 
-        DjangoModelOutput('settings.py', 'addressbook', 'friend') writes
+        DjangoModelEmitter('settings.py', 'addressbook', 'friend') writes
         records to addressbook.models.friend model using database settings
         from settings.py.
     """
@@ -162,3 +162,23 @@ class DjangoModelEmitter(Emitter):
 
     def emit_record(self, record):
         self._dbmodel.objects.create(**record)
+
+
+class MongoDBEmitter(Emitter):
+    """ Emitter that creates a document in a MongoDB datastore
+        
+        The names of the database and collection in which the records will
+        be inserted are required parameters. The host and port are optional,
+        defaulting to 'localhost' and 27017, repectively.
+    """
+    def __init__(self, database, collection, host='localhost', port=27017):
+        super(MongoDBEmitter, self).__init__()
+        from pymongo.connection import Connection
+        conn = Connection(host, port)
+        self.collection = conn[database][collection]
+    
+    def emit_record(self, record):
+        self.collection.insert(record)
+    
+    def done(self, record):
+        pass
