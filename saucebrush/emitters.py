@@ -182,6 +182,3 @@ class MongoDBEmitter(Emitter):
     
     def emit_record(self, record):
         self.collection.insert(record)
-    
-    def done(self, record):
-        pass
