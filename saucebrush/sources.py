@@ -132,3 +132,67 @@ class DjangoModelSource(object):
 
     def __iter__(self):
         return iter(self._data)
+
+
+class MongoDBSource(object):
+    """ Source for reading from a MongoDB database.
+    
+        The record dict is populated with records matching the spec
+        from the specified database and collection.
+    """
+    def __init__(self, database, collection, spec=None, host='localhost', port=27017, conn=None):
+        if not conn:
+            from pymongo.connection import Connection
+            conn = Connection(host, port)
+        self.collection = conn[database][collection]
+        self.spec = spec
+    
+    def __iter__(self):
+        return self._find_spec()
+    
+    def _find_spec(self):
+        for doc in self.collection.find(self.spec):
+            yield dict(doc)
+
+
+class SqliteSource(object):
+    """ Source that reads from a sqlite database.
+
+        The record dict is populated with the results from the
+        query argument. If given, args will be passed to the query
+        when executed.    
+    """
+
+    def __init__(self, dbpath, query, args=None, conn_params=None):
+        self._dbpath = dbpath
+        self._query = query
+        self._args = args or []
+        self._conn_params = conn_params or []
+
+    def _process_query(self):
+
+        import sqlite3
+        
+        def dict_factory(cursor, row):
+            d = { }
+            for idx, col in enumerate(cursor.description):
+                d[col[0]] = row[idx]
+            return d
+
+        conn = sqlite3.connect(self._dbpath)
+        conn.row_factory = dict_factory
+
+        if self._conn_params:
+            for param, value in self._conn_params.iteritems():
+                setattr(conn, param, value)
+
+        cursor = conn.cursor()
+
+        for row in cursor.execute(self._query, self._args):
+            yield row
+
+        cursor.close()
+        conn.close()
+
+    def __iter__(self):
+        return self._process_query()
