@@ -160,3 +160,30 @@ def dotted_key_set(dict_or_list, dotted_key, value, separator='.'):
             newkey = separator.join(keys[i:])
             for item in dict_or_list:
                 dotted_key_set(item, newkey, value, separator)
+
+#
+# utility classes
+#
+
+class Files(object):
+
+    def __init__(self, file_open_callback=None, *args):
+        self.paths = []
+        for arg in args:
+            self.add(arg)
+        self.file_open_callback = file_open_callback
+
+    def add(self, path):
+        self.paths.append(path)
+
+    def __iter__(self):
+        return self.linereader()
+
+    def linereader(self):
+        for path in iter(self.paths):
+            if os.path.exists(path):
+                self.file_open_callback(path)
+                f = open(path)
+                for line in f:
+                    yield line
+                f.close()
