@@ -360,6 +360,8 @@ class UnicodeFilter(Filter):
         for key, value in record.iteritems():
             if isinstance(value, str):
                 record[key] = unicode(value, self._encoding, self._errors)
+            elif isinstance(value, unicode):
+                record[key] = value.encode(self._encoding, self._errors)
         return record
 
 ###########################
