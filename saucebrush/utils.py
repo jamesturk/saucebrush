@@ -167,11 +167,11 @@ def dotted_key_set(dict_or_list, dotted_key, value, separator='.'):
 
 class Files(object):
 
-    def __init__(self, file_open_callback=None, *args):
+    def __init__(self, *args):
         self.paths = []
         for arg in args:
             self.add(arg)
-        self.file_open_callback = file_open_callback
+        self.file_open_callback = None
 
     def add(self, path):
         self.paths.append(path)
@@ -180,9 +180,11 @@ class Files(object):
         return self.linereader()
 
     def linereader(self):
+        import os
         for path in iter(self.paths):
             if os.path.exists(path):
-                self.file_open_callback(path)
+                if self.file_open_callback:
+                    self.file_open_callback(path)
                 f = open(path)
                 for line in f:
                     yield line

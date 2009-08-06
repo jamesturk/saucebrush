@@ -361,8 +361,22 @@ class UnicodeFilter(Filter):
             if isinstance(value, str):
                 record[key] = unicode(value, self._encoding, self._errors)
             elif isinstance(value, unicode):
+                record[key] = value.decode(self._encoding, self._errors)
+        return record
+
+class StringFilter(Filter):
+    
+    def __init__(self, encoding='utf-8', errors='ignore'):
+        super(UnicodeFilter, self).__init__()
+        self._encoding = encoding
+        self._errors = errors
+    
+    def process_record(self, record):
+        for key, value in record.iteritems():
+            if isinstance(value, unicode):
                 record[key] = value.encode(self._encoding, self._errors)
         return record
+        
 
 ###########################
 ## Commonly Used Filters ##
