@@ -199,10 +199,11 @@ class FieldAdder(Filter):
         to create sequentially numbered ids.
     """
 
-    def __init__(self, field_name, field_value):
+    def __init__(self, field_name, field_value, replace=True):
         super(FieldAdder, self).__init__()
         self._field_name = field_name
         self._field_value = field_value
+        self._replace = replace
 
     def process_record(self, record):
         if self._field_name not in record:
@@ -210,6 +211,8 @@ class FieldAdder(Filter):
                 record[self._field_name] = self._field_value()
             else:
                 record[self._field_name] = self._field_value
+        elif self._replace:
+            record[self._field_name] = self._field_value
         return record
 
     def __unicode__(self):
