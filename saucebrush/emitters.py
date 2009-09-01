@@ -85,24 +85,33 @@ class SqliteEmitter(Emitter):
         as a third parameter to SqliteEmitter.)
     """
 
-    def __init__(self, dbname, table_name, fieldnames=None):
+    def __init__(self, dbname, table_name, fieldnames=None, replace=False, quiet=False):
         super(SqliteEmitter, self).__init__()
         import sqlite3
         self._conn = sqlite3.connect(dbname)
         self._cursor = self._conn.cursor()
         self._table_name = table_name
+        self._replace = replace
+        self._quiet = quiet
         if fieldnames:
             create = "CREATE TABLE IF NOT EXISTS %s (%s)" % (table_name,
                 ', '.join([' '.join((field, 'TEXT')) for field in fieldnames]))
             self._cursor.execute(create)
 
     def emit_record(self, record):
+        import sqlite3
         # input should be escaped with ? if data isn't trusted
         qmarks = ','.join(('?',) * len(record))
-        insert = 'INSERT INTO %s (%s) VALUES (%s)' % (self._table_name,
+        insert = 'INSERT OR REPLACE' if self._replace else 'INSERT'
+        insert = '%s INTO %s (%s) VALUES (%s)' % (insert, self._table_name,
                                                       ','.join(record.keys()),
                                                       qmarks)
-        self._cursor.execute(insert, record.values())
+        try:
+            self._cursor.execute(insert, record.values())
+        except sqlite3.IntegrityError, ie:
+            if not self._quiet:
+                raise ie
+            self.reject_record(record, ie.message)
 
     def done(self):
         self._conn.commit()

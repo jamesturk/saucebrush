@@ -22,9 +22,9 @@ class CSVSource(object):
         ignoring the first row (presumed to be column names).
     """
 
-    def __init__(self, csvfile, fieldnames=None, skiprows=0, delimiter=','):
+    def __init__(self, csvfile, fieldnames=None, skiprows=0, **kwargs):
         import csv
-        self._dictreader = csv.DictReader(csvfile, fieldnames, delimiter=delimiter)
+        self._dictreader = csv.DictReader(csvfile, fieldnames, **kwargs)
         for _ in xrange(skiprows):
             self._dictreader.next()
 
