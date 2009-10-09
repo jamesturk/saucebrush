@@ -169,14 +169,18 @@ class FieldMerger(Filter):
         column bacon that is the result of spam+eggs
     """
 
-    def __init__(self, mapping, merge_func):
+    def __init__(self, mapping, merge_func, keep_fields=False):
         super(FieldMerger, self).__init__()
         self._field_mapping = mapping
         self._merge_func = merge_func
+        self._keep_fields = keep_fields
 
     def process_record(self, record):
         for to_col, from_cols in self._field_mapping.iteritems():
-            values = [record.pop(col, None) for col in from_cols]
+            if self._keep_fields:
+                values = [record.get(col, None) for col in from_cols]
+            else:
+                values = [record.pop(col, None) for col in from_cols]
             record[to_col] = self._merge_func(*values)
         return record
 
