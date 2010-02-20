@@ -37,7 +37,7 @@ class Recipe(filters.Filter):
         # connect datapath
         data = source
         for filter_ in filters:
-            data = filter_(data, recipe=self)
+            data = filter_.attach(data, recipe=self)
 
         # actually run the data through (causes iterators to actually be called)
         for record in data:

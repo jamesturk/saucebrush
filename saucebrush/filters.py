@@ -35,7 +35,7 @@ class Filter(object):
         if recipe:
             recipe.reject_record(record, message)
 
-    def __call__(self, source, recipe=None):
+    def attach(self, source, recipe=None):
         self._recipe = recipe
         for record in source:
             result = self.process_record(record)
@@ -51,7 +51,7 @@ class YieldFilter(Filter):
         filter must derive from YieldFilter.
     """
 
-    def __call__(self, source, recipe=None):
+    def attach(self, source, recipe=None):
         self._recipe = recipe
         for record in source:
             for result in self.process_record(record):
@@ -286,10 +286,10 @@ class Splitter(Filter):
                 for filter_ in filters:
                     subrecord = filter_.process_record(subrecord)
 
-            # if a list or tuple, use __call__
+            # if a list or tuple, use attach
             elif isinstance(subrecord, (list, tuple)):
                 for filter_ in filters:
-                    subrecord = filter_(subrecord, recipe=self._recipe)
+                    subrecord = filter_.attach(subrecord, recipe=self._recipe)
                 subrecord = [r for r in subrecord]  # unchain generators
 
             # place back from whence it came
