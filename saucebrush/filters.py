@@ -236,8 +236,7 @@ class FieldCopier(Filter):
     def process_record(self, record):
         # mapping is dest:source
         for dest, source in self._copy_mapping.iteritems():
-            srcval = utils.dotted_key_lookup(record, source)
-            utils.dotted_key_set(record, dest, srcval)
+            record[dest] = record[source]
         return record
 
 class FieldRenamer(Filter):
@@ -254,12 +253,11 @@ class FieldRenamer(Filter):
         # mapping is dest:source
         for dest, source in self._rename_mapping.iteritems():
             try:
-                srcval = utils.dotted_key_pop(record, source)
-                utils.dotted_key_set(record, dest, srcval)
+                record[dest] = record.pop(source)
             except KeyError:
                 # silently pass if source key didn't exist
                 pass
-        return record    
+        return record
 
 class Splitter(Filter):
     """ Filter that splits nested data into different paths.
