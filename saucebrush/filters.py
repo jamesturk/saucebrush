@@ -22,9 +22,6 @@ class Filter(object):
         takes a single record (python dictionary) and returns a result.
     """
 
-    def __init__(self):
-        pass
-
     def process_record(self, record):
         """ Abstract method to be overridden.
 
@@ -34,14 +31,15 @@ class Filter(object):
                                   self.__class__.__name__)
 
     def reject_record(self, record, message):
-        if hasattr(self, '_recipe'):
-            self._recipe.rejected.append((record, message))
+        recipe = getattr(self, '_recipe')
+        if recipe:
+            recipe.reject_record(record, message)
 
-    def __call__(self, recipe, source):
+    def __call__(self, source, recipe=None):
         self._recipe = recipe
         for record in source:
             result = self.process_record(record)
-            if not result is None:
+            if result is not None:
                 yield result
 
 
@@ -52,10 +50,8 @@ class YieldFilter(Filter):
         it is passed, it should yield back as many records as needed and the
         filter must derive from YieldFilter.
     """
-    def __init__(self):
-        super(YieldFilter, self).__init__()
 
-    def __call__(self, recipe, source):
+    def __call__(self, source, recipe=None):
         self._recipe = recipe
         for record in source:
             for result in self.process_record(record):
@@ -207,6 +203,8 @@ class FieldAdder(Filter):
         super(FieldAdder, self).__init__()
         self._field_name = field_name
         self._field_value = field_value
+        if hasattr(self._field_value, '__iter__'):
+            self._field_value = iter(self._field_value).next
         self._replace = replace
 
     def process_record(self, record):
@@ -291,7 +289,7 @@ class Splitter(Filter):
             # if a list or tuple, use __call__
             elif isinstance(subrecord, (list, tuple)):
                 for filter_ in filters:
-                    subrecord = filter_(subrecord)
+                    subrecord = filter_(subrecord, recipe=self._recipe)
                 subrecord = [r for r in subrecord]  # unchain generators
 
             # place back from whence it came
