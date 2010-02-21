@@ -175,7 +175,15 @@ class FilterTestCase(unittest.TestCase):
                          {'x':1, 'y':10, 'c':100}]
         self.assert_filter_result(fr, expected_data)
 
+    # splitter
+    # flatteners?
+    # unique
+    # unicode filter
+    # string filter
 
+    # phone # cleaner
+    # date cleaner
+    # name cleaner
 
 if __name__ == '__main__':
     unittest.main()

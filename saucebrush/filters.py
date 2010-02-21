@@ -72,7 +72,7 @@ class FieldFilter(Filter):
 
     def process_record(self, record):
         """ Calls process_field on all keys passed to __init__. """
-        
+
         for key in self._target_keys:
             try:
                 item = record[key]
@@ -84,7 +84,7 @@ class FieldFilter(Filter):
 
     def process_field(self, item):
         """ Given a value, return the value that it should be replaced with. """
-        
+
         raise NotImplementedError('process_field not defined in ' +
                                   self.__class__.__name__)
 
@@ -93,18 +93,14 @@ class FieldFilter(Filter):
 
 class ConditionalFilter(YieldFilter):
     """ ABC for filters that only pass through records meeting a condition.
-    
+
         All derived filters must provide a test_record(self, record) that
         returns True or False -- True indicating that the record should be
         passed through, and False preventing pass through.
     """
-    
-    def __init__(self):
-        super(ConditionalFilter, self).__init__()
-        
     def process_record(self, record):
         """ Yields all records for which self.test_record is true """
-        
+
         if self.test_record(record):
             yield record
 
@@ -194,7 +190,7 @@ class FieldAdder(Filter):
 
         from itertools import count
         FieldAdder('id', count)
-        
+
         would yield a new column named id that uses the itertools count iterable
         to create sequentially numbered ids.
     """
@@ -208,13 +204,11 @@ class FieldAdder(Filter):
         self._replace = replace
 
     def process_record(self, record):
-        if self._field_name not in record:
+        if self._field_name not in record or self._replace:
             if callable(self._field_value):
                 record[self._field_name] = self._field_value()
             else:
                 record[self._field_name] = self._field_value
-        elif self._replace:
-            record[self._field_name] = self._field_value
         return record
 
     def __unicode__(self):
@@ -223,14 +217,14 @@ class FieldAdder(Filter):
 
 class FieldCopier(Filter):
     """ Filter that copies one field to another.
-    
+
         Takes a dictionary mapping destination keys to source keys.
-    
+
     """
     def __init__(self, copy_mapping):
         super(FieldCopier, self).__init__()
         self._copy_mapping = copy_mapping
-        
+
     def process_record(self, record):
         # mapping is dest:source
         for dest, source in self._copy_mapping.iteritems():
@@ -239,22 +233,17 @@ class FieldCopier(Filter):
 
 class FieldRenamer(Filter):
     """ Filter that renames one field to another.
-    
+
         Takes a dictionary mapping destination keys to source keys.
-    
     """
     def __init__(self, rename_mapping):
         super(FieldRenamer, self).__init__()
         self._rename_mapping = rename_mapping
-        
+
     def process_record(self, record):
         # mapping is dest:source
         for dest, source in self._rename_mapping.iteritems():
-            try:
-                record[dest] = record.pop(source)
-            except KeyError:
-                # silently pass if source key didn't exist
-                pass
+            record[dest] = record.pop(source)
         return record
 
 class Splitter(Filter):
@@ -299,7 +288,7 @@ class Splitter(Filter):
 
 class Flattener(FieldFilter):
     """ Collapse a set of similar dictionaries into a list.
-    
+
         Takes a dictionary of keys and flattens the key names:
 
         addresses = [{'addresses': [{'address': {'state':'NC', 'street':'146 shirley drive'}},
@@ -313,7 +302,7 @@ class Flattener(FieldFilter):
     """
     def __init__(self, keys):
         super(Flattener, self).__init__(keys)
-    
+
     def process_field(self, item):
         result = []
         for d in item:
@@ -323,13 +312,13 @@ class Flattener(FieldFilter):
             result.append(rec)
         return result
 
-    
+
 class DictFlattener(Filter):
     def __init__(self, keys, separator='_'):
         super(DictFlattener, self).__init__()
         self._keys = utils.str_or_list(keys)
         self._separator = separator
-    
+
     def process_record(self, record):
         return utils.flatten(record, keys=self._keys, separator=self._separator)
 
@@ -337,11 +326,11 @@ class DictFlattener(Filter):
 class Unique(ConditionalFilter):
     """ Filter that ensures that all records passing through are unique.
     """
-    
+
     def __init__(self):
         super(Unique, self).__init__()
         self._seen = set()
-        
+
     def test_record(self, record):
         record_hash = hash(repr(record))
         if record_hash not in self._seen:
@@ -353,12 +342,12 @@ class Unique(ConditionalFilter):
 class UnicodeFilter(Filter):
     """ Convert all str elements in the record to Unicode.
     """
-    
+
     def __init__(self, encoding='utf-8', errors='ignore'):
         super(UnicodeFilter, self).__init__()
         self._encoding = encoding
         self._errors = errors
-    
+
     def process_record(self, record):
         for key, value in record.iteritems():
             if isinstance(value, str):
@@ -368,18 +357,18 @@ class UnicodeFilter(Filter):
         return record
 
 class StringFilter(Filter):
-    
+
     def __init__(self, encoding='utf-8', errors='ignore'):
         super(UnicodeFilter, self).__init__()
         self._encoding = encoding
         self._errors = errors
-    
+
     def process_record(self, record):
         for key, value in record.iteritems():
             if isinstance(value, unicode):
                 record[key] = value.encode(self._encoding, self._errors)
         return record
-        
+
 
 ###########################
 ## Commonly Used Filters ##
@@ -407,14 +396,14 @@ class PhoneNumberCleaner(FieldFilter):
 
 class DateCleaner(FieldFilter):
     """ Filter that cleans dates to match a given format.
-    
+
         Takes a list of target keys and to and from formats in strftime format.
     """
     def __init__(self, keys, from_format, to_format):
         super(DateCleaner, self).__init__(keys)
         self._from_format = from_format
         self._to_format = to_format
-        
+
     def process_field(self, item):
         return time.strftime(self._to_format,
                              time.strptime(item, self._from_format))
@@ -428,21 +417,21 @@ class NameCleaner(Filter):
         would attempt to split 'name' into firstname, middlename, lastname,
         and suffix columns, and if it did not fit would place it in raw_name
     """
-    
+
     # first middle? last suffix?
     FIRST_LAST = re.compile('''^\s*(?:(?P<firstname>\w+)(?:\.?)
                                 \s+(?:(?P<middlename>\w+)\.?\s+)?
                                 (?P<lastname>[A-Za-z'-]+))
                                 (?:\s+(?P<suffix>JR\.?|II|III|IV))?
                                 \s*$''', re.VERBOSE | re.IGNORECASE)
-    
+
     # last, first middle? suffix?
     LAST_FIRST = re.compile('''^\s*(?:(?P<lastname>[A-Za-z'-]+),
                                 \s+(?P<firstname>\w+)(?:\.?)
                                 (?:\s+(?P<middlename>\w+)\.?)?)
                                 (?:\s+(?P<suffix>JR\.?|II|III|IV))?
                                 \s*$''', re.VERBOSE | re.IGNORECASE)
-    
+
     def __init__(self, keys, prefix='', formats=None, nomatch_name=None):
         super(NameCleaner, self).__init__()
         self._keys = utils.str_or_list(keys)
@@ -457,22 +446,22 @@ class NameCleaner(Filter):
         # run for each key (not using a FieldFilter due to multi-field output)
         for key in self._keys:
             name = record[key]
-            
+
             # check if key matches any formats
             for format in self._name_formats:
                 match = format.match(name)
-                
+
                 # if there is a match, remove original name and add pieces
                 if match:
                     record.pop(key)
                     for k,v in match.groupdict().iteritems():
                         record[self._name_prefix + k] = v
                     break
-                
+
             # if there is no match, move name into nomatch_name
             else:
                 if self._nomatch_name:
                     record.pop(key)
                     record[self._nomatch_name] = name
-            
+
         return record
