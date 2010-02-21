@@ -63,7 +63,7 @@ class FixedWidthFileSource(object):
         line = self._fwfile.next()
         record = {}
         for name, range_ in self._fields_dict.iteritems():
-            record[name] = line[range[0]:range_[1]].rstrip(self._fillchars)
+            record[name] = line[range_[0]:range_[1]].rstrip(self._fillchars)
         return record
 
 
