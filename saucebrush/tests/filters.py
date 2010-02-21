@@ -4,7 +4,7 @@ import types
 from saucebrush.filters import (Filter, YieldFilter, FieldFilter,
                                 ConditionalFilter, FieldModifier,
                                 FieldRemover, FieldMerger, FieldAdder,
-                                FieldCopier, FieldRenamer)
+                                FieldCopier, FieldRenamer, Unique)
 
 class DummyRecipe(object):
     rejected_record = None
@@ -17,6 +17,13 @@ class Doubler(Filter):
     def process_record(self, record):
         return record*2
 
+class OddRemover(Filter):
+    def process_record(self, record):
+        if record % 2 == 0:
+            return record
+        else:
+            return None     # explicitly return None
+
 class ListFlattener(YieldFilter):
     def process_record(self, record):
         for item in record:
@@ -26,7 +33,7 @@ class FieldDoubler(FieldFilter):
     def process_field(self, item):
         return item*2
 
-class OddRemover(ConditionalFilter):
+class ConditionalOddRemover(ConditionalFilter):
     def test_record(self, record):
         # return True for even values
         return record % 2 == 0
@@ -61,6 +68,13 @@ class FilterTestCase(unittest.TestCase):
         self.assertEquals(type(result), types.GeneratorType)
         self.assertEquals(list(result), [2,4,6])
 
+    def test_simple_filter_return_none(self):
+        cf = OddRemover()
+        result = cf.attach(range(10))
+
+        # ensure only even numbers remain
+        self.assertEquals(list(result), [0,2,4,6,8])
+
     def test_simple_yield_filter(self):
         lf = ListFlattener()
         result = lf.attach([[1],[2,3],[4,5,6]])
@@ -79,7 +93,7 @@ class FilterTestCase(unittest.TestCase):
         self.assert_filter_result(ff, expected_data)
 
     def test_conditional_filter(self):
-        cf = OddRemover()
+        cf = ConditionalOddRemover()
         result = cf.attach(range(10))
 
         # ensure only even numbers remain
@@ -175,15 +189,17 @@ class FilterTestCase(unittest.TestCase):
                          {'x':1, 'y':10, 'c':100}]
         self.assert_filter_result(fr, expected_data)
 
-    # splitter
-    # flatteners?
-    # unique
-    # unicode filter
-    # string filter
+    # TODO: splitter & flattner tests?
 
-    # phone # cleaner
-    # date cleaner
-    # name cleaner
+    def test_unique_filter(self):
+        u = Unique()
+        in_data = [{'a': 77}, {'a':33}, {'a': 77}]
+        expected_data = [{'a': 77}, {'a':33}]
+        result = u.attach(in_data)
+
+        self.assertEquals(list(result), expected_data)
+
+    # TODO: unicode & string filter tests
 
 if __name__ == '__main__':
     unittest.main()
