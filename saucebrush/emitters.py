@@ -11,14 +11,10 @@ class Emitter(Filter):
         All derived emitters must provide an emit_record(self, record) that
         takes a single record (python dictionary).
 
-        Emitters can optionally define a close() method that is called after
+        Emitters can optionally define a done() method that is called after
         all records are processed (allowing database flushes, or printing of
         aggregate data).
     """
-
-    def __init__(self):
-        super(Emitter, self).__init__()
-
     def process_record(self, record):
         self.emit_record(record)
         return record
@@ -64,7 +60,7 @@ class CSVEmitter(Emitter):
         records to a csvfile with the columns in the order specified.
     """
 
-    def __init__(self, csvfile, fieldnames=None):
+    def __init__(self, csvfile, fieldnames):
         super(CSVEmitter, self).__init__()
         import csv
         self._dictwriter = csv.DictWriter(csvfile, fieldnames)
