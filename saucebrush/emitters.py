@@ -137,10 +137,13 @@ class SqlDumpEmitter(Emitter):
                             table_name, '`,`'.join(fieldnames))
 
     def quote(self, item):
-        if not isinstance(item, ('unicode','str')):
+        if item is None:
+            return "null"
+        elif isinstance(item, (unicode, str)):
+            item = item.replace("\\","\\\\").replace("'","\\'").replace(chr(0),'0')
+            return "'%s'" % item
+        else:
             return "%s" % item
-        item = item.replace("\\","\\\\").replace("'","\\'").replace(chr(0),'0')
-        return "'%s'" % item
 
     def emit_record(self, record):
         quoted_data = [self.quote(record[field]) for field in self._fieldnames]
