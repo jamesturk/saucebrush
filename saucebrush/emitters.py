@@ -137,6 +137,8 @@ class SqlDumpEmitter(Emitter):
                             table_name, '`,`'.join(fieldnames))
 
     def quote(self, item):
+        if not isinstance(item, ('unicode','str')):
+            return "%s" % item
         item = item.replace("\\","\\\\").replace("'","\\'").replace(chr(0),'0')
         return "'%s'" % item
 
