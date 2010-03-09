@@ -359,7 +359,7 @@ class UnicodeFilter(Filter):
 class StringFilter(Filter):
 
     def __init__(self, encoding='utf-8', errors='ignore'):
-        super(UnicodeFilter, self).__init__()
+        super(StringFilter, self).__init__()
         self._encoding = encoding
         self._errors = errors
 
