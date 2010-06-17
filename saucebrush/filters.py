@@ -339,6 +339,27 @@ class Unique(ConditionalFilter):
         else:
             return False
 
+class UniqueID(ConditionalFilter):
+    """ Filter that ensures that all records through have a unique ID.
+
+        Takes the name of an ID field, or multiple field names in the case
+        of a composite ID.
+    """
+
+    def __init__(self, field='id', *args):
+        super(UniqueID, self).__init__()
+        self._seen = set()
+        self._id_fields = [field]
+        self._id_fields.extend(args)
+
+    def test_record(self, record):
+        id_hash = hash(repr([record[key] for key in self._id_fields]))
+        if id_hash not in self._seen:
+            self._seen.add(id_hash)
+            return True
+        else:
+            return False
+
 class UnicodeFilter(Filter):
     """ Convert all str elements in the record to Unicode.
     """
