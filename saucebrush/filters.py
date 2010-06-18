@@ -97,17 +97,30 @@ class ConditionalFilter(YieldFilter):
         All derived filters must provide a test_record(self, record) that
         returns True or False -- True indicating that the record should be
         passed through, and False preventing pass through.
+
+        If validator is True then raises a ValidationError instead of
+        silently dropping records that fail test_record.
     """
+
+    validator = False
+
     def process_record(self, record):
         """ Yields all records for which self.test_record is true """
 
         if self.test_record(record):
             yield record
+        elif self.validator:
+            raise ValidationError(record)
 
     def test_record(self, record):
         """ Given a record, return True iff it should be passed on """
         raise NotImplementedError('test_record not defined in ' +
                                   self.__class__.__name__)
+
+class ValidationError(Exception):
+    def __init__(self, record):
+        super(ValidationError, self).__init__(repr(record))
+        self.record = record
 
 #####################
 ## Generic Filters ##
@@ -339,6 +352,10 @@ class Unique(ConditionalFilter):
         else:
             return False
 
+class UniqueValidator(Unique):
+    validator = True
+
+
 class UniqueID(ConditionalFilter):
     """ Filter that ensures that all records through have a unique ID.
 
@@ -359,6 +376,10 @@ class UniqueID(ConditionalFilter):
             return True
         else:
             return False
+
+class UniqueIDValidator(UniqueID):
+    validator = True
+
 
 class UnicodeFilter(Filter):
     """ Convert all str elements in the record to Unicode.
