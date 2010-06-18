@@ -219,7 +219,7 @@ class FileSource(object):
                 yield record
         elif isinstance(self._input, basestring):
             with open(self._input) as f:
-                for record in self._process_file(input):
+                for record in self._process_file(f):
                     yield record
         elif hasattr(self._input, '__iter__'):
             for el in self._input:
