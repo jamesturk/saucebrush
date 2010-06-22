@@ -176,7 +176,7 @@ class DjangoModelEmitter(Emitter):
 
 class MongoDBEmitter(Emitter):
     """ Emitter that creates a document in a MongoDB datastore
-        
+
         The names of the database and collection in which the records will
         be inserted are required parameters. The host and port are optional,
         defaulting to 'localhost' and 27017, repectively.
@@ -190,6 +190,25 @@ class MongoDBEmitter(Emitter):
         if drop_collection:
             db.drop_collection(collection)
         self.collection = db[collection]
-    
+
     def emit_record(self, record):
         self.collection.insert(record)
+
+
+class LoggingEmitter(Emitter):
+    """ Emitter that logs to a Python logging.Logger instance.
+
+        The msg_template will be passed the record being emitted as
+        a format parameter. The resulting message will get logged
+        at the provided level.
+    """
+    import logging
+
+    def __init__(self, logger, msg_template, level=logging.DEBUG):
+        super(LoggingEmitter, self).__init__()
+        self.logger = logger
+        self.msg_template = msg_template
+        self.level = level
+
+    def emit_record(self, record):
+        self.logger.log(self.level, self.msg_template % record)
