@@ -34,6 +34,15 @@ class FieldDoubler(FieldFilter):
     def process_field(self, item):
         return item*2
 
+class NonModifyingFieldDoubler(Filter):
+    def __init__(self, key):
+        self.key = key
+
+    def process_record(self, record):
+        record = dict(record)
+        record[self.key] *= 2
+        return record
+
 class ConditionalOddRemover(ConditionalFilter):
     def test_record(self, record):
         # return True for even values
@@ -111,7 +120,7 @@ class FilterTestCase(unittest.TestCase):
                 {'a': [{'b': 10}]},
                 {'a': [{'b': 16}, {'b':4}, {'b':2}]}]
 
-        sf = SubrecordFilter('a', FieldDoubler('b'))
+        sf = SubrecordFilter('a', NonModifyingFieldDoubler('b'))
         result = sf.attach(data)
 
         self.assertEquals(list(result), expected)
@@ -125,7 +134,7 @@ class FilterTestCase(unittest.TestCase):
                     {'a': {'d':[{'b': 10}]}},
                     {'a': {'d':[{'b': 16}, {'b':4}, {'b':2}]}}]
 
-        sf = SubrecordFilter('a.d', FieldDoubler('b'))
+        sf = SubrecordFilter('a.d', NonModifyingFieldDoubler('b'))
         result = sf.attach(data)
 
         self.assertEquals(list(result), expected)
@@ -143,7 +152,7 @@ class FilterTestCase(unittest.TestCase):
             {'a':{'b':{'c':6}}},
         ]
 
-        sf = SubrecordFilter('a.b', FieldDoubler('c'))
+        sf = SubrecordFilter('a.b', NonModifyingFieldDoubler('c'))
         result = sf.attach(data)
 
         self.assertEquals(list(result), expected)
@@ -161,7 +170,7 @@ class FilterTestCase(unittest.TestCase):
             {'a': [{'b': {'c': 4}} ]}
         ]
 
-        sf = SubrecordFilter('a.b', FieldDoubler('c'))
+        sf = SubrecordFilter('a.b', NonModifyingFieldDoubler('c'))
         result = sf.attach(data)
 
         self.assertEquals(list(result), expected)

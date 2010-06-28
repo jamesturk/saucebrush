@@ -146,22 +146,30 @@ class SubrecordFilter(Filter):
     """
 
     def __init__(self, field_path, filter_):
-        #if '.' in field_path:
-        #    self.field_path, self.key = field_path.rsplit('.', 1)
-        #else:
-        #    self.field_path = None
-        #    self.key = field_path
-        self.field_path = field_path
+        if '.' in field_path:
+            self.field_path, self.key = field_path.rsplit('.', 1)
+        else:
+            self.field_path = None
+            self.key = field_path
         self.filter = filter_
 
-    def process_record(self, record):
-        #if self.field_path:
-        subrecord = _dotted_get(record, self.field_path)
-        if isinstance(subrecord, (tuple, list)):
-            for p in subrecord:
-                self.filter.process_record(p)
+    def process_subrecord(self, parent):
+        if isinstance(parent[self.key], (tuple, list)):
+            parent[self.key] = [self.filter.process_record(r) for r in parent[self.key]]
         else:
-            self.filter.process_record(subrecord)
+            parent[self.key] = self.filter.process_record(parent[self.key])
+
+    def process_record(self, record):
+        if self.field_path:
+            subrecord_parent = _dotted_get(record, self.field_path)
+        else:
+            subrecord_parent = record
+
+        if isinstance(subrecord_parent, (tuple, list)):
+            for r in subrecord_parent:
+                self.process_subrecord(r)
+        else:
+            self.process_subrecord(subrecord_parent)
         return record
 
 #####################
