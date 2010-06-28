@@ -122,6 +122,29 @@ class ValidationError(Exception):
         super(ValidationError, self).__init__(repr(record))
         self.record = record
 
+def _dotted_get(d, path):
+    if path:
+        key_pieces = path.split('.', 1)
+        piece = d[key_pieces[0]]
+        if isinstance(piece, (tuple, list)):
+            return [_dotted_get(i, '.'.join(key_pieces[1:])) for i in piece]
+        elif isinstance(piece, (dict)):
+            return _dotted_get(piece, '.'.join(key_pieces[1:]))
+    else:
+        return d
+
+class SubrecordFilter(Filter):
+
+    def __init__(self, field_path, filter_):
+        self.field_path = field_path
+        self.filter = filter_
+
+    def process_record(self, record):
+        subrecord = _dotted_get(record, self.field_path)
+        for p in subrecord:
+            p = self.filter.process_record(p)
+        return record
+
 #####################
 ## Generic Filters ##
 #####################

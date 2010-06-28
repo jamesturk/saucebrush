@@ -2,6 +2,7 @@ import unittest
 import operator
 import types
 from saucebrush.filters import (Filter, YieldFilter, FieldFilter,
+                                SubrecordFilter,
                                 ConditionalFilter, FieldModifier,
                                 FieldRemover, FieldMerger, FieldAdder,
                                 FieldCopier, FieldRenamer, Unique)
@@ -98,6 +99,24 @@ class FilterTestCase(unittest.TestCase):
 
         # ensure only even numbers remain
         self.assertEquals(list(result), [0,2,4,6,8])
+
+    ### FILTERS FOR Subrecord
+
+    def test_subrecord_filter(self):
+        data = [{'a': [{'b': 2}, {'b': 4}]},
+                {'a': [{'b': 5}]},
+                {'a': [{'b': 8}, {'b':2}, {'b':1}]}]
+
+
+        expected = [{'a': [{'b': 4}, {'b': 8}]},
+                {'a': [{'b': 10}]},
+                {'a': [{'b': 16}, {'b':4}, {'b':2}]}]
+
+        sf = SubrecordFilter('a', FieldDoubler('b'))
+        result = sf.attach(data)
+
+        self.assertEquals(list(result), expected)
+
 
     def test_field_modifier(self):
         # another version of FieldDoubler
