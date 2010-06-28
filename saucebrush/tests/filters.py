@@ -100,13 +100,12 @@ class FilterTestCase(unittest.TestCase):
         # ensure only even numbers remain
         self.assertEquals(list(result), [0,2,4,6,8])
 
-    ### FILTERS FOR Subrecord
+    ### Tests for Subrecord
 
-    def test_subrecord_filter(self):
+    def test_subrecord_filter_list(self):
         data = [{'a': [{'b': 2}, {'b': 4}]},
                 {'a': [{'b': 5}]},
                 {'a': [{'b': 8}, {'b':2}, {'b':1}]}]
-
 
         expected = [{'a': [{'b': 4}, {'b': 8}]},
                 {'a': [{'b': 10}]},
@@ -117,6 +116,57 @@ class FilterTestCase(unittest.TestCase):
 
         self.assertEquals(list(result), expected)
 
+    def test_subrecord_filter_deep(self):
+        data = [{'a': {'d':[{'b': 2}, {'b': 4}]}},
+                {'a': {'d':[{'b': 5}]}},
+                {'a': {'d':[{'b': 8}, {'b':2}, {'b':1}]}}]
+
+        expected = [{'a': {'d':[{'b': 4}, {'b': 8}]}},
+                    {'a': {'d':[{'b': 10}]}},
+                    {'a': {'d':[{'b': 16}, {'b':4}, {'b':2}]}}]
+
+        sf = SubrecordFilter('a.d', FieldDoubler('b'))
+        result = sf.attach(data)
+
+        self.assertEquals(list(result), expected)
+
+    def test_subrecord_filter_nonlist(self):
+        data = [
+            {'a':{'b':{'c':1}}},
+            {'a':{'b':{'c':2}}},
+            {'a':{'b':{'c':3}}},
+        ]
+
+        expected = [
+            {'a':{'b':{'c':2}}},
+            {'a':{'b':{'c':4}}},
+            {'a':{'b':{'c':6}}},
+        ]
+
+        sf = SubrecordFilter('a.b', FieldDoubler('c'))
+        result = sf.attach(data)
+
+        self.assertEquals(list(result), expected)
+
+    def test_subrecord_filter_list_in_path(self):
+        data = [
+            {'a': [{'b': {'c': 5}}, {'b': {'c': 6}}]},
+            {'a': [{'b': {'c': 1}}, {'b': {'c': 2}}, {'b': {'c': 3}}]},
+            {'a': [{'b': {'c': 2}} ]}
+        ]
+
+        expected = [
+            {'a': [{'b': {'c': 10}}, {'b': {'c': 12}}]},
+            {'a': [{'b': {'c': 2}}, {'b': {'c': 4}}, {'b': {'c': 6}}]},
+            {'a': [{'b': {'c': 4}} ]}
+        ]
+
+        sf = SubrecordFilter('a.b', FieldDoubler('c'))
+        result = sf.attach(data)
+
+        self.assertEquals(list(result), expected)
+
+    ### Tests for Generic Filters
 
     def test_field_modifier(self):
         # another version of FieldDoubler

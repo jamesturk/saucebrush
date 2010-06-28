@@ -123,6 +123,11 @@ class ValidationError(Exception):
         self.record = record
 
 def _dotted_get(d, path):
+    """
+        utility function for SubrecordFilter
+
+        dives into a complex nested dictionary with paths like a.b.c
+    """
     if path:
         key_pieces = path.split('.', 1)
         piece = d[key_pieces[0]]
@@ -134,15 +139,29 @@ def _dotted_get(d, path):
         return d
 
 class SubrecordFilter(Filter):
+    """ Filter that calls another filter on subrecord(s) of a record
+
+        Takes a dotted path (eg. a.b.c) and instantiated filter and runs that
+        filter on all subrecords found at the path.
+    """
 
     def __init__(self, field_path, filter_):
+        #if '.' in field_path:
+        #    self.field_path, self.key = field_path.rsplit('.', 1)
+        #else:
+        #    self.field_path = None
+        #    self.key = field_path
         self.field_path = field_path
         self.filter = filter_
 
     def process_record(self, record):
+        #if self.field_path:
         subrecord = _dotted_get(record, self.field_path)
-        for p in subrecord:
-            p = self.filter.process_record(p)
+        if isinstance(subrecord, (tuple, list)):
+            for p in subrecord:
+                self.filter.process_record(p)
+        else:
+            self.filter.process_record(subrecord)
         return record
 
 #####################
