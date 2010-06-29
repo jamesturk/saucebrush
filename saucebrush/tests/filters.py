@@ -2,7 +2,7 @@ import unittest
 import operator
 import types
 from saucebrush.filters import (Filter, YieldFilter, FieldFilter,
-                                SubrecordFilter,
+                                SubrecordFilter, ConditionalPathFilter,
                                 ConditionalFilter, FieldModifier,
                                 FieldRemover, FieldMerger, FieldAdder,
                                 FieldCopier, FieldRenamer, Unique)
@@ -174,6 +174,19 @@ class FilterTestCase(unittest.TestCase):
         result = sf.attach(data)
 
         self.assertEquals(list(result), expected)
+
+    def test_conditional_path(self):
+
+        predicate = lambda r: r['a'] == 1
+
+        # double b if a == 1, otherwise double c
+        cpf = ConditionalPathFilter(predicate, FieldDoubler('b'),
+                                    FieldDoubler('c'))
+        expected_data = [{'a':1, 'b':4, 'c':3},
+                         {'a':5, 'b':5, 'c':10},
+                         {'a':1, 'b':20, 'c':100}]
+
+        self.assert_filter_result(cpf, expected_data)
 
     ### Tests for Generic Filters
 

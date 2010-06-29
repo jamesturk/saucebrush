@@ -172,6 +172,20 @@ class SubrecordFilter(Filter):
             self.process_subrecord(subrecord_parent)
         return record
 
+class ConditionalPathFilter(Filter):
+    """ Filter that uses a predicate to split input among two filter paths. """
+
+    def __init__(self, predicate_func, true_filter, false_filter):
+        self.predicate_func = predicate_func
+        self.true_filter = true_filter
+        self.false_filter = false_filter
+
+    def process_record(self, record):
+        if self.predicate_func(record):
+            return self.true_filter.process_record(record)
+        else:
+            return self.false_filter.process_record(record)
+
 #####################
 ## Generic Filters ##
 #####################
