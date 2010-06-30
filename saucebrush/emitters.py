@@ -183,10 +183,16 @@ class MongoDBEmitter(Emitter):
     """
     def __init__(self, database, collection, host='localhost', port=27017, drop_collection=False, conn=None):
         super(MongoDBEmitter, self).__init__()
-        if not conn:
-            from pymongo.connection import Connection
-            conn = Connection(host, port)
-        db = conn[database]
+
+        from pymongo.database import Database
+        if not isinstance(database, Database):
+            if not conn:
+                from pymongo.connection import Connection
+                conn = Connection(host, port)
+            db = conn[database]
+        else:
+            db = database
+
         if drop_collection:
             db.drop_collection(collection)
         self.collection = db[collection]
