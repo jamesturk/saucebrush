@@ -30,10 +30,10 @@ class Filter(object):
         raise NotImplementedError('process_record not defined in ' +
                                   self.__class__.__name__)
 
-    def reject_record(self, record, message):
+    def reject_record(self, record, exception):
         recipe = getattr(self, '_recipe')
         if recipe:
-            recipe.reject_record(record, message)
+            recipe.reject_record(record, exception)
 
     def attach(self, source, recipe=None):
         self._recipe = recipe
@@ -43,7 +43,7 @@ class Filter(object):
                 if result is not None:
                     yield result
             except Exception as e:
-                self.reject_record(record, unicode(e))
+                self.reject_record(record, e)
 
 
 class YieldFilter(Filter):
@@ -61,7 +61,7 @@ class YieldFilter(Filter):
                 for result in self.process_record(record):
                     yield result
             except Exception as e:
-                self.reject_record(record, unicode(e))
+                self.reject_record(record, e)
 
 
 class FieldFilter(Filter):

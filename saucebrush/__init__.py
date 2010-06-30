@@ -34,9 +34,10 @@ class Recipe(object):
 
         return filters
 
-    def reject_record(self, record, message):
+    def reject_record(self, record, exception):
         if self.error_stream:
-            self.error_stream.run([record])
+            self.error_stream.run([{'record': record,
+                                    'exception': repr(exception)}])
 
     def run(self, source):
         # load filters

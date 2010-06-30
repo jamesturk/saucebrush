@@ -23,7 +23,9 @@ class RecipeTestCase(unittest.TestCase):
         saver = Saver()
         recipe = Recipe(Raiser(), error_stream=saver)
         recipe.run([{'a': 1}, {'b': 2}])
-        self.assertEqual(saver.saved, [{'a': 1}, {'b': 2}])
+
+        self.assertEqual(saver.saved[0]['record'], {'a': 1})
+        self.assertEqual(saver.saved[1]['record'], {'b': 2})
 
 
 if __name__ == '__main__':
