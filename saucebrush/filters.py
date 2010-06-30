@@ -38,9 +38,12 @@ class Filter(object):
     def attach(self, source, recipe=None):
         self._recipe = recipe
         for record in source:
-            result = self.process_record(record)
-            if result is not None:
-                yield result
+            try:
+                result = self.process_record(record)
+                if result is not None:
+                    yield result
+            except Exception as e:
+                self.reject_record(record, unicode(e))
 
 
 class YieldFilter(Filter):
@@ -54,8 +57,11 @@ class YieldFilter(Filter):
     def attach(self, source, recipe=None):
         self._recipe = recipe
         for record in source:
-            for result in self.process_record(record):
-                yield result
+            try:
+                for result in self.process_record(record):
+                    yield result
+            except Exception as e:
+                self.reject_record(record, unicode(e))
 
 
 class FieldFilter(Filter):
