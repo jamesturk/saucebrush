@@ -27,6 +27,15 @@ class RecipeTestCase(unittest.TestCase):
         self.assertEqual(saver.saved[0]['record'], {'a': 1})
         self.assertEqual(saver.saved[1]['record'], {'b': 2})
 
+    def test_done(self):
+        saver = Saver()
+        recipe = Recipe(saver)
+        recipe.run([1])
+        recipe.done()
+
+        self.assertRaises(ValueError, recipe.run, [2])
+        self.assertEqual(saver.saved, [1])
+
 
 if __name__ == '__main__':
     unittest.main()
