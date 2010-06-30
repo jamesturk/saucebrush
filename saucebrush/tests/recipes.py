@@ -34,6 +34,7 @@ class RecipeTestCase(unittest.TestCase):
         recipe.done()
 
         self.assertRaises(ValueError, recipe.run, [2])
+        self.assertRaises(ValueError, recipe.done)
         self.assertEqual(saver.saved, [1])
 
 
