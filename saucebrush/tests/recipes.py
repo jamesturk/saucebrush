@@ -1,6 +1,6 @@
 import doctest
 import unittest
-from saucebrush import Recipe, run_recipe
+from saucebrush import Recipe, run_recipe, SaucebrushError, OvercookedError
 from saucebrush.filters import Filter
 
 
@@ -28,6 +28,10 @@ class RecipeTestCase(unittest.TestCase):
         self.assertEqual(saver.saved[0]['record'], {'a': 1})
         self.assertEqual(saver.saved[1]['record'], {'b': 2})
 
+        # Must pass either a Recipe, a Filter or an iterable of Filters
+        # as the error_stream argument
+        self.assertRaises(SaucebrushError, Recipe, error_stream=5)
+
     def test_run_recipe(self):
         saver = Saver()
         run_recipe([1, 2], saver)
@@ -40,8 +44,8 @@ class RecipeTestCase(unittest.TestCase):
         recipe.run([1])
         recipe.done()
 
-        self.assertRaises(ValueError, recipe.run, [2])
-        self.assertRaises(ValueError, recipe.done)
+        self.assertRaises(OvercookedError, recipe.run, [2])
+        self.assertRaises(OvercookedError, recipe.done)
         self.assertEqual(saver.saved, [1])
 
 

@@ -5,6 +5,17 @@
 import filters, emitters, sources, utils
 
 
+class SaucebrushError(Exception):
+    pass
+
+
+class OvercookedError(Exception):
+    """
+    Exception for trying to operate on a Recipe that has been finished.
+    """
+    pass
+
+
 class Recipe(object):
 
     def __init__(self, *filter_args, **kwargs):
@@ -24,8 +35,8 @@ class Recipe(object):
             elif hasattr(self.error_stream, '__iter__'):
                 self.error_stream = Recipe(*self.error_stream)
             else:
-                raise ValueError('error_stream must be either a filter'
-                                 ' or an iterable of filters')
+                raise SaucebrushError('error_stream must be either a filter'
+                                      ' or an iterable of filters')
 
     def reject_record(self, record, exception):
         if self.error_stream:
@@ -34,7 +45,7 @@ class Recipe(object):
 
     def run(self, source):
         if self.finished:
-            raise ValueError('run() called on finished recipe')
+            raise OvercookedError('run() called on finished recipe')
 
         # connect datapath
         data = source
@@ -47,7 +58,7 @@ class Recipe(object):
 
     def done(self):
         if self.finished:
-            raise ValueError('done() called on finished recipe')
+            raise OvercookedError('done() called on finished recipe')
 
         self.finished = True
 
