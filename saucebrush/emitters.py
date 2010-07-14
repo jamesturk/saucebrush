@@ -53,6 +53,34 @@ class DebugEmitter(Emitter):
         self._outfile.write(str(record) + '\n')
 
 
+class CountEmitter(Emitter):
+    """ Emitter that writes the record count to a file-like object.
+    
+        CountEmitter() by default writes to stdout.
+        CountEmitter(outfile=open('text', 'w')) would print to a file name test.
+        CountEmitter(every=1000000) would write the count every 1,000,000 records.
+    """
+
+    def __init__(self, every=1000, outfile=None, format=None):
+        super(CountEmitter, self).__init__()
+        if not outfile:
+            import sys
+            self._outfile = sys.stdout
+        else:
+            self._outfile = outfile
+        self._format = "%s\n" if format is None else format
+        self._every = every
+        self.count = 0
+
+    def emit_record(self, record):
+        self.count += 1
+        if self.count % self._every == 0:
+            self._outfile.write(self._format % self.count)
+    
+    def done(self):
+        self._outfile.write(self._format % self.count)
+
+
 class CSVEmitter(Emitter):
     """ Emitter that writes records to a CSV file.
 

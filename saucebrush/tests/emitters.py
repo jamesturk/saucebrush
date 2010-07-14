@@ -1,6 +1,6 @@
 import unittest
 from cStringIO import StringIO
-from saucebrush.emitters import DebugEmitter, CSVEmitter
+from saucebrush.emitters import DebugEmitter, CSVEmitter, CountEmitter
 
 class EmitterTestCase(unittest.TestCase):
 
@@ -20,6 +20,15 @@ class EmitterTestCase(unittest.TestCase):
         for _ in data:
             pass
         self.assertEquals(self.output.getvalue(), 'x,y,z\r\n1,2,3\r\n5,5,5\r\n')
+    
+    def test_count_emitter(self):
+        ce = CountEmitter(every=10, outfile=self.output, format="%s records\n")
+        data = ce.attach([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22])
+        for _ in data:
+            pass
+        self.assertEquals(self.output.getvalue(), '10 records\n20 records\n')
+        ce.done()
+        self.assertEquals(self.output.getvalue(), '10 records\n20 records\n22 records\n')
 
 if __name__ == '__main__':
     unittest.main()
