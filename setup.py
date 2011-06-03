@@ -2,6 +2,6 @@
 from setuptools import setup
 
 setup(name="saucebrush",
-      version='0.1',
+      version='0.5.0-dev',
       packages=['saucebrush'],
       )
