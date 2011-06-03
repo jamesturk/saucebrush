@@ -1,3 +1,4 @@
+import os
 import urllib2
 """
     General utilities used within saucebrush that may be useful elsewhere.
@@ -93,7 +94,6 @@ class Files(object):
         return self.linereader()
 
     def linereader(self):
-        import os
         for path in iter(self.paths):
             if os.path.exists(path):
                 if self.file_open_callback:
