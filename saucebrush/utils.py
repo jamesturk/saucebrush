@@ -1,3 +1,5 @@
+import os
+import urllib2
 """
     General utilities used within saucebrush that may be useful elsewhere.
 """
@@ -72,6 +74,12 @@ def str_or_list(obj):
 #
 
 class Files(object):
+    """ Iterate over multiple files as a single file. Pass the paths of the
+        files as arguments to the class constructor:
+        
+            for line in Files('/path/to/file/a', '/path/to/file/b'):
+                pass
+    """
 
     def __init__(self, *args):
         self.paths = []
@@ -86,7 +94,6 @@ class Files(object):
         return self.linereader()
 
     def linereader(self):
-        import os
         for path in iter(self.paths):
             if os.path.exists(path):
                 if self.file_open_callback:
@@ -95,3 +102,18 @@ class Files(object):
                 for line in f:
                     yield line
                 f.close()
+
+class RemoteFile(object):
+    """ Stream data from a remote file.
+    
+        :param url: URL to remote file
+    """
+    
+    def __init__(self, url):
+        self._url = url
+        
+    def __iter__(self):
+        resp = urllib2.urlopen(self._url)
+        for line in resp:
+            yield line.rstrip()
+        resp.close()
