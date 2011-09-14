@@ -61,24 +61,37 @@ class CountEmitter(Emitter):
         CountEmitter(every=1000000) would write the count every 1,000,000 records.
     """
 
-    def __init__(self, every=1000, outfile=None, format=None):
+    def __init__(self, every=1000, of=None, outfile=None, format=None):
+        
         super(CountEmitter, self).__init__()
+        
         if not outfile:
             import sys
             self._outfile = sys.stdout
         else:
             self._outfile = outfile
-        self._format = "%s\n" if format is None else format
+            
+        if format is None:
+            if of is not None:
+                format = "%(count)s of %(of)s\n"
+            else:
+                format = "%(count)s\n"
+                
+        self._format = format
         self._every = every
+        self._of = of
         self.count = 0
+    
+    def __str__(self):
+        return self._format % {'count': self.count, 'of': self._of}
 
     def emit_record(self, record):
         self.count += 1
         if self.count % self._every == 0:
-            self._outfile.write(self._format % self.count)
+            self._outfile.write(str(self))
     
     def done(self):
-        self._outfile.write(self._format % self.count)
+        self._outfile.write(str(self))
 
 
 class CSVEmitter(Emitter):
