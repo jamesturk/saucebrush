@@ -27,7 +27,7 @@ def _median(values):
     
     if count % 2 == 1:
         # odd number of items, return middle value
-        return values[count / 2]
+        return float(values[count / 2])
     else:
         # even number of items, return average of middle two items
         mid = count / 2
