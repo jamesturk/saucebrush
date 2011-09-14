@@ -19,10 +19,16 @@ class StatsTestCase(unittest.TestCase):
         self.assertEqual(fltr.value(), 36.0)
     
     def test_median(self):
+        # odd number of values
         fltr = Median('a')
         list(fltr.attach(self._simple_data()))
         self.assertEqual(fltr.value(), 1)
-    
+        
+        # even number of values
+        fltr = Median('a')
+        list(fltr.attach(self._simple_data()[:2]))
+        self.assertEqual(fltr.value(), 3)
+        
     def test_minmax(self):
         fltr = MinMax('b')
         list(fltr.attach(self._simple_data()))
