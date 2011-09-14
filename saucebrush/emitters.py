@@ -59,6 +59,7 @@ class CountEmitter(Emitter):
         CountEmitter() by default writes to stdout.
         CountEmitter(outfile=open('text', 'w')) would print to a file name test.
         CountEmitter(every=1000000) would write the count every 1,000,000 records.
+        CountEmitter(every=100, of=2000) would write "<count> of 2000" every 100 records.
     """
 
     def __init__(self, every=1000, of=None, outfile=None, format=None):
