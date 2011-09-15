@@ -3,7 +3,7 @@ import operator
 import types
 from saucebrush.filters import (Filter, YieldFilter, FieldFilter,
                                 SubrecordFilter, ConditionalPathFilter,
-                                ConditionalFilter, FieldModifier,
+                                ConditionalFilter, FieldModifier, FieldKeeper,
                                 FieldRemover, FieldMerger, FieldAdder,
                                 FieldCopier, FieldRenamer, Unique)
 
@@ -199,6 +199,13 @@ class FilterTestCase(unittest.TestCase):
                          {'a':10, 'b':5, 'c':10},
                          {'a':2, 'b':10, 'c':200}]
         self.assert_filter_result(fm, expected_data)
+
+    def test_field_keeper(self):
+        fk = FieldKeeper(['c'])
+        
+        # check against expected results
+        expected_data = [{'c':3}, {'c':5}, {'c':100}]
+        self.assert_filter_result(fk, expected_data)
 
     def test_field_remover(self):
         fr = FieldRemover(['a', 'b'])

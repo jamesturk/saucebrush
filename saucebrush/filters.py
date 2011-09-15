@@ -215,6 +215,24 @@ class FieldModifier(FieldFilter):
                                  str(self._target_keys), str(self._filter_func))
 
 
+class FieldKeeper(Filter):
+    """ Filter that removes all but the given set of fields.
+    
+        FieldKeeper(('spam', 'eggs')) removes all bu tthe spam and eggs
+        fields from every record filtered.
+    """
+    
+    def __init__(self, keys):
+        super(FieldKeeper, self).__init__()
+        self._target_keys = utils.str_or_list(keys)
+    
+    def process_record(self, record):
+        for key in record.keys():
+            if key not in self._target_keys:
+                del record[key]
+        return record
+
+
 class FieldRemover(Filter):
     """ Filter that removes a given set of fields.
 
