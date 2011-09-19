@@ -7,7 +7,9 @@ def _average(values):
     
         :param values: an iterable of ints or floats to average
     """
-    return sum(values) / float(len(values))
+    value_count = len(values)
+    if len(values) > 0:
+        return sum(values) / float(value_count)
 
 def _median(values):
     """ Calculate the median of a list of values.
@@ -175,3 +177,27 @@ class StandardDeviation(StatsFilter):
                 False if values is a sample. Default: False
         """
         return _stddev(self._values, population)
+
+class Histogram(StatsFilter):
+    
+    label_length = 6
+    
+    def __init__(self, field, **kwargs):
+        super(Histogram, self).__init__(field, **kwargs)
+        self._data = {}
+    
+    def process_field(self, item):
+        if item not in self._data:
+            self._data[item] = 0
+        self._data[item] += 1
+    
+    def value(self):
+        return self._data.copy()
+        
+    def __str__(self):
+        output = ""
+        for key in sorted(self._data.keys()):
+            key_str = str(key).ljust(self.label_length)[:self.label_length]
+            output += "%s %s\n" % (key_str, "*" * self._data[key])
+        return output
+        
