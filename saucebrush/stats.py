@@ -179,6 +179,14 @@ class StandardDeviation(StatsFilter):
         return _stddev(self._values, population)
 
 class Histogram(StatsFilter):
+    """ Generate a basic histogram of the specified field. The value() method
+        returns a dict of value to occurance count mappings. The __str__ method
+        generates a basic and limited histogram useful for printing to the
+        command line. The label_length attribute determines the padding and
+        cut-off of the basic histogram labels.
+        
+        **This filters maintains a dict of unique field values in memory.**
+    """
     
     label_length = 6
     
