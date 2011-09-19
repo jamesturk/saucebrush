@@ -1,4 +1,5 @@
 from saucebrush.filters import Filter
+import collections
 import itertools
 import math
 
@@ -192,23 +193,33 @@ class Histogram(StatsFilter):
     
     def __init__(self, field, **kwargs):
         super(Histogram, self).__init__(field, **kwargs)
-        self._data = {}
+        self._counter = collections.Counter()
     
     def process_field(self, item):
-        item = self.prep_field(item)
-        if item not in self._data:
-            self._data[item] = 0
-        self._data[item] += 1
+        self._counter[self.prep_field(item)] += 1
     
     def prep_field(self, item):
         return item
     
     def value(self):
-        return self._data.copy()
+        return self._counter.copy()
+    
+    def in_order(self):
+        ordered = []
+        for key in sorted(self._counter.keys()):
+            ordered.append((key, self._counter[key]))
+        return ordered
+    
+    def most_common(self, n=None):
+        return self._counter.most_common(n)
+    
+    @classmethod
+    def as_string(self, occurences, label_length):
+        output = "\n"
+        for key, count in occurences:
+            key_str = str(key).ljust(label_length)[:label_length]
+            output += "%s %s\n" % (key_str, "*" * count)
+        return output
         
     def __str__(self):
-        output = ""
-        for key in sorted(self._data.keys()):
-            key_str = str(key).ljust(self.label_length)[:self.label_length]
-            output += "%s %s\n" % (key_str, "*" * self._data[key])
-        return output
+        return Histogram.as_string(self.in_order(), label_length=self.label_length)

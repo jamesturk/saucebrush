@@ -46,7 +46,7 @@ class StatsTestCase(unittest.TestCase):
         fltr = Histogram('a')
         fltr.label_length = 1
         list(fltr.attach(self._simple_data()))
-        self.assertEqual(str(fltr), "1 **\n5 *\n")
+        self.assertEqual(str(fltr), "\n1 **\n5 *\n")
 
 if __name__ == '__main__':
     unittest.main()
