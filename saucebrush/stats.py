@@ -195,9 +195,13 @@ class Histogram(StatsFilter):
         self._data = {}
     
     def process_field(self, item):
+        item = self.prep_field(item)
         if item not in self._data:
             self._data[item] = 0
         self._data[item] += 1
+    
+    def prep_field(self, item):
+        return item
     
     def value(self):
         return self._data.copy()
@@ -208,4 +212,3 @@ class Histogram(StatsFilter):
             key_str = str(key).ljust(self.label_length)[:self.label_length]
             output += "%s %s\n" % (key_str, "*" * self._data[key])
         return output
-        
