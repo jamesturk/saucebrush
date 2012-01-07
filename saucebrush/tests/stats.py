@@ -1,5 +1,5 @@
 import unittest
-from saucebrush.stats import Sum, Average, Median, MinMax, StandardDeviation
+from saucebrush.stats import Sum, Average, Median, MinMax, StandardDeviation, Histogram
 
 class StatsTestCase(unittest.TestCase):
 
@@ -19,10 +19,16 @@ class StatsTestCase(unittest.TestCase):
         self.assertEqual(fltr.value(), 36.0)
     
     def test_median(self):
+        # odd number of values
         fltr = Median('a')
         list(fltr.attach(self._simple_data()))
         self.assertEqual(fltr.value(), 1)
-    
+        
+        # even number of values
+        fltr = Median('a')
+        list(fltr.attach(self._simple_data()[:2]))
+        self.assertEqual(fltr.value(), 3)
+        
     def test_minmax(self):
         fltr = MinMax('b')
         list(fltr.attach(self._simple_data()))
@@ -35,6 +41,12 @@ class StatsTestCase(unittest.TestCase):
         self.assertEqual(fltr.median(), 5)
         self.assertEqual(fltr.value(), (55.4346462061408, 3073.0))
         self.assertEqual(fltr.value(True), (45.2621990922521, 2048.6666666666665))
+    
+    def test_histogram(self):
+        fltr = Histogram('a')
+        fltr.label_length = 1
+        list(fltr.attach(self._simple_data()))
+        self.assertEqual(str(fltr), "\n1 **\n5 *\n")
 
 if __name__ == '__main__':
     unittest.main()

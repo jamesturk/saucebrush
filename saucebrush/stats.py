@@ -1,4 +1,5 @@
 from saucebrush.filters import Filter
+import collections
 import itertools
 import math
 
@@ -7,7 +8,9 @@ def _average(values):
     
         :param values: an iterable of ints or floats to average
     """
-    return sum(values) / float(len(values))
+    value_count = len(values)
+    if len(values) > 0:
+        return sum(values) / float(value_count)
 
 def _median(values):
     """ Calculate the median of a list of values.
@@ -27,7 +30,7 @@ def _median(values):
     
     if count % 2 == 1:
         # odd number of items, return middle value
-        return values[count / 2]
+        return float(values[count / 2])
     else:
         # even number of items, return average of middle two items
         mid = count / 2
@@ -175,3 +178,48 @@ class StandardDeviation(StatsFilter):
                 False if values is a sample. Default: False
         """
         return _stddev(self._values, population)
+
+class Histogram(StatsFilter):
+    """ Generate a basic histogram of the specified field. The value() method
+        returns a dict of value to occurance count mappings. The __str__ method
+        generates a basic and limited histogram useful for printing to the
+        command line. The label_length attribute determines the padding and
+        cut-off of the basic histogram labels.
+        
+        **This filters maintains a dict of unique field values in memory.**
+    """
+    
+    label_length = 6
+    
+    def __init__(self, field, **kwargs):
+        super(Histogram, self).__init__(field, **kwargs)
+        self._counter = collections.Counter()
+    
+    def process_field(self, item):
+        self._counter[self.prep_field(item)] += 1
+    
+    def prep_field(self, item):
+        return item
+    
+    def value(self):
+        return self._counter.copy()
+    
+    def in_order(self):
+        ordered = []
+        for key in sorted(self._counter.keys()):
+            ordered.append((key, self._counter[key]))
+        return ordered
+    
+    def most_common(self, n=None):
+        return self._counter.most_common(n)
+    
+    @classmethod
+    def as_string(self, occurences, label_length):
+        output = "\n"
+        for key, count in occurences:
+            key_str = str(key).ljust(label_length)[:label_length]
+            output += "%s %s\n" % (key_str, "*" * count)
+        return output
+        
+    def __str__(self):
+        return Histogram.as_string(self.in_order(), label_length=self.label_length)
