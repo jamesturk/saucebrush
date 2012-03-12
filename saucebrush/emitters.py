@@ -146,7 +146,7 @@ class SqliteEmitter(Emitter):
                                                       ','.join(record.keys()),
                                                       qmarks)
         try:
-            self._cursor.execute(insert, record.values())
+            self._cursor.execute(insert, list(record.values()))
         except sqlite3.IntegrityError as ie:
             if not self._quiet:
                 raise ie

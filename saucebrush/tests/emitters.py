@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
 from contextlib import closing
 from io import StringIO
+import os
 import unittest
 
-from saucebrush.emitters import DebugEmitter, CSVEmitter, CountEmitter
+from saucebrush.emitters import DebugEmitter, CSVEmitter, CountEmitter, SqliteEmitter
 
 class EmitterTestCase(unittest.TestCase):
 
@@ -12,19 +13,6 @@ class EmitterTestCase(unittest.TestCase):
             de = DebugEmitter(output)
             list(de.attach([1,2,3]))
             self.assertEqual(output.getvalue(), '1\n2\n3\n')
-
-    def test_csv_emitter(self):
-
-        try:
-            import cStringIO    # if Python 2.x then use old cStringIO
-            io = cStringIO.StringIO()
-        except:
-            io = StringIO()     # if Python 3.x then use StringIO
-
-        with closing(io) as output:
-            ce = CSVEmitter(output, ('x','y','z'))
-            list(ce.attach([{'x':1, 'y':2, 'z':3}, {'x':5, 'y':5, 'z':5}]))
-            self.assertEqual(output.getvalue(), 'x,y,z\r\n1,2,3\r\n5,5,5\r\n')
 
     def test_count_emitter(self):
 
@@ -48,6 +36,39 @@ class EmitterTestCase(unittest.TestCase):
             self.assertEqual(output.getvalue(), '10 of 22\n20 of 22\n')
             ce.done()
             self.assertEqual(output.getvalue(), '10 of 22\n20 of 22\n22 of 22\n')
+
+    def test_csv_emitter(self):
+
+        try:
+            import cStringIO    # if Python 2.x then use old cStringIO
+            io = cStringIO.StringIO()
+        except:
+            io = StringIO()     # if Python 3.x then use StringIO
+
+        with closing(io) as output:
+            ce = CSVEmitter(output, ('x','y','z'))
+            list(ce.attach([{'x':1, 'y':2, 'z':3}, {'x':5, 'y':5, 'z':5}]))
+            self.assertEqual(output.getvalue(), 'x,y,z\r\n1,2,3\r\n5,5,5\r\n')
+
+    def test_sqlite_emitter(self):
+
+        import sqlite3, tempfile
+
+        with closing(tempfile.NamedTemporaryFile(suffix='.db')) as f:
+            db_path = f.name
+
+        sle = SqliteEmitter(db_path, 'testtable', fieldnames=('a','b','c'))
+        list(sle.attach([{'a': '1', 'b': '2', 'c': '3'}]))
+        sle.done()
+
+        with closing(sqlite3.connect(db_path)) as conn:
+            cur = conn.cursor()
+            cur.execute("""SELECT a, b, c FROM testtable""")
+            results = cur.fetchall()
+
+        os.unlink(db_path)
+
+        self.assertEqual(results, [('1', '2', '3')])
 
 if __name__ == '__main__':
     unittest.main()
