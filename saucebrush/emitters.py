@@ -2,7 +2,7 @@
     Saucebrush Emitters are filters that instead of modifying the record, output
     it in some manner.
 """
-
+from __future__ import unicode_literals
 from saucebrush.filters import Filter
 
 class Emitter(Filter):
@@ -50,12 +50,12 @@ class DebugEmitter(Emitter):
             self._outfile = outfile
 
     def emit_record(self, record):
-        self._outfile.write(str(record) + '\n')
+        self._outfile.write("{0}\n".format(record))
 
 
 class CountEmitter(Emitter):
     """ Emitter that writes the record count to a file-like object.
-    
+
         CountEmitter() by default writes to stdout.
         CountEmitter(outfile=open('text', 'w')) would print to a file name test.
         CountEmitter(every=1000000) would write the count every 1,000,000 records.
@@ -63,36 +63,36 @@ class CountEmitter(Emitter):
     """
 
     def __init__(self, every=1000, of=None, outfile=None, format=None):
-        
+
         super(CountEmitter, self).__init__()
-        
+
         if not outfile:
             import sys
             self._outfile = sys.stdout
         else:
             self._outfile = outfile
-            
+
         if format is None:
             if of is not None:
                 format = "%(count)s of %(of)s\n"
             else:
                 format = "%(count)s\n"
-                
+
         self._format = format
         self._every = every
         self._of = of
         self.count = 0
-    
-    def __str__(self):
+
+    def format(self):
         return self._format % {'count': self.count, 'of': self._of}
 
     def emit_record(self, record):
         self.count += 1
         if self.count % self._every == 0:
-            self._outfile.write(str(self))
-    
+            self._outfile.write(self.format())
+
     def done(self):
-        self._outfile.write(str(self))
+        self._outfile.write(self.format())
 
 
 class CSVEmitter(Emitter):
@@ -107,7 +107,9 @@ class CSVEmitter(Emitter):
         import csv
         self._dictwriter = csv.DictWriter(csvfile, fieldnames)
         # write header row
-        self._dictwriter.writerow(dict(zip(fieldnames, fieldnames)))
+        header_row = dict(zip(fieldnames, fieldnames))
+        print(header_row)
+        self._dictwriter.writerow(header_row)
 
     def emit_record(self, record):
         self._dictwriter.writerow(record)
