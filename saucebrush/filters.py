@@ -217,17 +217,17 @@ class FieldModifier(FieldFilter):
 
 class FieldKeeper(Filter):
     """ Filter that removes all but the given set of fields.
-    
+
         FieldKeeper(('spam', 'eggs')) removes all bu tthe spam and eggs
         fields from every record filtered.
     """
-    
+
     def __init__(self, keys):
         super(FieldKeeper, self).__init__()
         self._target_keys = utils.str_or_list(keys)
-    
+
     def process_record(self, record):
-        for key in record.keys():
+        for key in list(record.keys()):
             if key not in self._target_keys:
                 del record[key]
         return record
@@ -269,7 +269,7 @@ class FieldMerger(Filter):
         self._keep_fields = keep_fields
 
     def process_record(self, record):
-        for to_col, from_cols in self._field_mapping.iteritems():
+        for to_col, from_cols in self._field_mapping.items():
             if self._keep_fields:
                 values = [record.get(col, None) for col in from_cols]
             else:
@@ -328,7 +328,7 @@ class FieldCopier(Filter):
 
     def process_record(self, record):
         # mapping is dest:source
-        for dest, source in self._copy_mapping.iteritems():
+        for dest, source in self._copy_mapping.items():
             record[dest] = record[source]
         return record
 
@@ -343,7 +343,7 @@ class FieldRenamer(Filter):
 
     def process_record(self, record):
         # mapping is dest:source
-        for dest, source in self._rename_mapping.iteritems():
+        for dest, source in self._rename_mapping.items():
             record[dest] = record.pop(source)
         return record
 
@@ -363,7 +363,7 @@ class Splitter(Filter):
         self._split_mapping = split_mapping
 
     def process_record(self, record):
-        for key, filters in self._split_mapping.iteritems():
+        for key, filters in self._split_mapping.items():
 
             # if the key doesn't exist -- move on to next key
             try:
@@ -479,7 +479,7 @@ class UnicodeFilter(Filter):
         self._errors = errors
 
     def process_record(self, record):
-        for key, value in record.iteritems():
+        for key, value in record.items():
             if isinstance(value, str):
                 record[key] = unicode(value, self._encoding, self._errors)
             elif isinstance(value, unicode):
@@ -494,7 +494,7 @@ class StringFilter(Filter):
         self._errors = errors
 
     def process_record(self, record):
-        for key, value in record.iteritems():
+        for key, value in record.items():
             if isinstance(value, unicode):
                 record[key] = value.encode(self._encoding, self._errors)
         return record
@@ -584,7 +584,7 @@ class NameCleaner(Filter):
                 # if there is a match, remove original name and add pieces
                 if match:
                     record.pop(key)
-                    for k,v in match.groupdict().iteritems():
+                    for k,v in match.groupdict().items():
                         record[self._name_prefix + k] = v
                     break
 

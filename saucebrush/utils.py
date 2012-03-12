@@ -38,20 +38,20 @@ def string_dig(element, separator=''):
 def flatten(item, prefix='', separator='_', keys=None):
     """
         Flatten nested dictionary into one with its keys concatenated together.
-        
+
         >>> flatten({'a':1, 'b':{'c':2}, 'd':[{'e':{'r':7}}, {'e':5}],
                     'f':{'g':{'h':6}}})
         {'a': 1, 'b_c': 2, 'd': [{'e_r': 7}, {'e': 5}], 'f_g_h': 6}
     """
-    
+
     # update dictionaries recursively
-    
+
     if isinstance(item, dict):
         # don't prepend a leading _
         if prefix != '':
             prefix += separator
         retval = {}
-        for key, value in item.iteritems():
+        for key, value in item.items():
             if (not keys) or (key in keys):
                 retval.update(flatten(value, prefix + key, separator, keys))
             else:

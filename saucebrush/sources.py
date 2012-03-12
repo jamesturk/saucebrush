@@ -62,7 +62,7 @@ class FixedWidthFileSource(object):
     def next(self):
         line = self._fwfile.next()
         record = {}
-        for name, range_ in self._fields_dict.iteritems():
+        for name, range_ in self._fields_dict.items():
             record[name] = line[range_[0]:range_[1]].rstrip(self._fillchars)
         return record
 
@@ -182,7 +182,7 @@ class SqliteSource(object):
         self._conn = sqlite3.connect(self._dbpath)
         self._conn.row_factory = dict_factory
         if self._conn_params:
-            for param, value in self._conn_params.iteritems():
+            for param, value in self._conn_params.items():
                 setattr(self._conn, param, value)
 
     def _process_query(self):
