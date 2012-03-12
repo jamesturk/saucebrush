@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from contextlib import closing
-from io import BytesIO, StringIO
+from io import StringIO
 import unittest
 
 from saucebrush.emitters import DebugEmitter, CSVEmitter, CountEmitter
@@ -16,8 +16,8 @@ class EmitterTestCase(unittest.TestCase):
     def test_csv_emitter(self):
 
         try:
-            import cStringIO    # if Python 2.x then use BytesIO
-            io = BytesIO()
+            import cStringIO    # if Python 2.x then use old cStringIO
+            io = cStringIO.StringIO()
         except:
             io = StringIO()     # if Python 3.x then use StringIO
 
