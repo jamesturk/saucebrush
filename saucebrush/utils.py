@@ -1,5 +1,10 @@
 import os
-import urllib2
+
+try:
+    from urllib.request import urlopen  # attemp py3 first
+except ImportError:
+    from urllib2 import urlopen         # fallback to py2
+
 """
     General utilities used within saucebrush that may be useful elsewhere.
 """
@@ -75,7 +80,7 @@ def str_or_list(obj):
 class Files(object):
     """ Iterate over multiple files as a single file. Pass the paths of the
         files as arguments to the class constructor:
-        
+
             for line in Files('/path/to/file/a', '/path/to/file/b'):
                 pass
     """
@@ -104,15 +109,15 @@ class Files(object):
 
 class RemoteFile(object):
     """ Stream data from a remote file.
-    
+
         :param url: URL to remote file
     """
-    
+
     def __init__(self, url):
         self._url = url
-        
+
     def __iter__(self):
-        resp = urllib2.urlopen(self._url)
+        resp = urlopen(self._url)
         for line in resp:
             yield line.rstrip()
         resp.close()
