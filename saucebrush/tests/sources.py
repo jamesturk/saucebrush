@@ -42,17 +42,5 @@ class SourceTestCase(unittest.TestCase):
                           'year':'1999'}]
         self.assertEquals(list(source), expected_data)
 
-    def test_fixed_width_source(self):
-        data = cStringIO.StringIO('JamesNovember.3.1986\nTim..September151999')
-        fields = (('name',5), ('month',9), ('day',2), ('year',4))
-        source = FixedWidthFileSource(data, fields, fillchars='.')
-        expected_data = [{'name':'James', 'month':'November', 'day':'3',
-                          'year':'1986'},
-                         {'name':'Tim', 'month':'September', 'day':'15',
-                          'year':'1999'}]
-        self.assertEquals(list(source), expected_data)
-
-    
-
 if __name__ == '__main__':
     unittest.main()
