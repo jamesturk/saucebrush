@@ -65,13 +65,13 @@ class SourceTestCase(unittest.TestCase):
 
         try:
 
-            from BeautifulSoup import BeautifulSoup
+            import lxml
 
             hts = HtmlTableSource(content, 'thetable')
             self.assertEqual(list(hts), [{'a': '1', 'b': '2', 'c': '3'}])
 
         except ImportError:
-            self.skipTest("BeautifulSoup is not installed")
+            self.skipTest("lxml is not installed")
 
 if __name__ == '__main__':
     unittest.main()

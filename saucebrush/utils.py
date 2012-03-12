@@ -25,21 +25,6 @@ def get_django_model(dj_settings, app_label, model_name):
     from django.db.models import get_model
     return get_model(app_label, model_name)
 
-
-def string_dig(element, separator=''):
-    """
-        Dig into BeautifulSoup HTML elements looking for inner strings.
-
-        If element resembled: <p><b>test</b><em>test</em></p>
-        then string_dig(element, '~') would return test~test
-    """
-    if element.string:
-        return element.string
-    else:
-        return separator.join([string_dig(child)
-                            for child in element.findAll(True)])
-
-
 def flatten(item, prefix='', separator='_', keys=None):
     """
         Flatten nested dictionary into one with its keys concatenated together.

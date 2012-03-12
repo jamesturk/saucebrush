@@ -92,30 +92,32 @@ class HtmlTableSource(object):
     def __init__(self, htmlfile, id_or_num, fieldnames=None, skiprows=0):
 
         # extract the table
-        from BeautifulSoup import BeautifulSoup
-        soup = BeautifulSoup(htmlfile.read())
+        from lxml.html import parse
+        doc = parse(htmlfile).getroot()
         if isinstance(id_or_num, int):
-            table = soup.findAll('table')[id_or_num]
+            table = doc.cssselect('table')[id_or_num]
         else:
-            table = soup.find('table', id=id_or_num)
+            table = doc.cssselect('table#%s' % id_or_num)
+
+        table = table[0] # get the first table
 
         # skip the necessary number of rows
-        self._rows = table.findAll('tr')[skiprows:]
+        self._rows = table.cssselect('tr')[skiprows:]
 
         # determine the fieldnames
         if not fieldnames:
-            self._fieldnames = [td.string
-                                for td in self._rows[0].findAll(('td','th'))]
+            self._fieldnames = [td.text_content()
+                                for td in self._rows[0].cssselect('td, th')]
             skiprows += 1
         else:
             self._fieldnames = fieldnames
 
         # skip the necessary number of rows
-        self._rows = table.findAll('tr')[skiprows:]
+        self._rows = table.cssselect('tr')[skiprows:]
 
     def process_tr(self):
         for row in self._rows:
-            strings = [utils.string_dig(td) for td in row.findAll('td')]
+            strings = [td.text_content() for td in row.cssselect('td')]
             yield dict(zip(self._fieldnames, strings))
 
     def __iter__(self):
