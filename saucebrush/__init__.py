@@ -2,7 +2,7 @@
     Saucebrush is a data loading & manipulation framework written in python.
 """
 
-import filters, emitters, sources, utils
+from . import filters, emitters, sources, utils
 
 
 class SaucebrushError(Exception):
