@@ -146,7 +146,7 @@ class SqliteEmitter(Emitter):
                                                       qmarks)
         try:
             self._cursor.execute(insert, record.values())
-        except sqlite3.IntegrityError, ie:
+        except sqlite3.IntegrityError as ie:
             if not self._quiet:
                 raise ie
             self.reject_record(record, ie.message)
