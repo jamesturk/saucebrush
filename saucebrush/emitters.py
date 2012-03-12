@@ -108,7 +108,6 @@ class CSVEmitter(Emitter):
         self._dictwriter = csv.DictWriter(csvfile, fieldnames)
         # write header row
         header_row = dict(zip(fieldnames, fieldnames))
-        print(header_row)
         self._dictwriter.writerow(header_row)
 
     def emit_record(self, record):
