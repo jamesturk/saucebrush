@@ -59,12 +59,17 @@ class FixedWidthFileSource(object):
     def __iter__(self):
         return self
 
-    def next(self):
-        line = self._fwfile.next()
+    def __next__(self):
+        line = next(self._fwfile)
         record = {}
         for name, range_ in self._fields_dict.items():
             record[name] = line[range_[0]:range_[1]].rstrip(self._fillchars)
         return record
+
+    def next(self):
+        """ Keep Python 2 next() method that defers to __next__().
+        """
+        return self.__next__()
 
 
 class HtmlTableSource(object):

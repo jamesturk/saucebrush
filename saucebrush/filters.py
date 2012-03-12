@@ -301,7 +301,11 @@ class FieldAdder(Filter):
         self._field_name = field_name
         self._field_value = field_value
         if hasattr(self._field_value, '__iter__'):
-            self._field_value = iter(self._field_value).next
+            value_iter = iter(self._field_value)
+            if hasattr(value_iter, "next"):
+                self._field_value = value_iter.next
+            else:
+                self._field_value = value_iter.__next__
         self._replace = replace
 
     def process_record(self, record):

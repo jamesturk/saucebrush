@@ -63,7 +63,8 @@ class FilterTestCase(unittest.TestCase):
         recipe = DummyRecipe()
         f = Doubler()
         result = f.attach([1,2,3], recipe=recipe)
-        result.next()       # next has to be called for attach to take effect
+        # next has to be called for attach to take effect
+        next(result)
         f.reject_record('bad', 'this one was bad')
 
         # ensure that the rejection propagated to the recipe
@@ -202,7 +203,7 @@ class FilterTestCase(unittest.TestCase):
 
     def test_field_keeper(self):
         fk = FieldKeeper(['c'])
-        
+
         # check against expected results
         expected_data = [{'c':3}, {'c':5}, {'c':100}]
         self.assert_filter_result(fk, expected_data)
