@@ -60,9 +60,8 @@ def flatten(item, prefix='', separator='_', keys=None):
     #elif isinstance(item, (tuple, list)):
     #    return {prefix: [flatten(i, prefix, separator, keys) for i in item]}
     else:
-        print item, prefix
         return {prefix: item}
-    
+
 def str_or_list(obj):
     if isinstance(obj, str):
         return [obj]
