@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 from io import BytesIO, StringIO
 import unittest
 
-from saucebrush.sources import CSVSource, FixedWidthFileSource
+from saucebrush.sources import CSVSource, FixedWidthFileSource, HtmlTableSource
 
 class SourceTestCase(unittest.TestCase):
 
@@ -43,6 +43,35 @@ class SourceTestCase(unittest.TestCase):
                          {'name':'Tim', 'month':'September', 'day':'15',
                           'year':'1999'}]
         self.assertEqual(list(source), expected_data)
+
+    def test_html_table_source(self):
+
+        content = StringIO("""
+            <html>
+                <table id="thetable">
+                    <tr>
+                        <th>a</th>
+                        <th>b</th>
+                        <th>c</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>3</td>
+                    </tr>
+                </table>
+            </html>
+        """)
+
+        try:
+
+            from BeautifulSoup import BeautifulSoup
+
+            hts = HtmlTableSource(content, 'thetable')
+            self.assertEqual(list(hts), [{'a': '1', 'b': '2', 'c': '3'}])
+
+        except ImportError:
+            self.skipTest("BeautifulSoup is not installed")
 
 if __name__ == '__main__':
     unittest.main()

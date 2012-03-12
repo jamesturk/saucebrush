@@ -4,8 +4,9 @@
     All sources must implement the iterable interface and return python
     dictionaries.
 """
-
+from __future__ import unicode_literals
 import string
+
 from saucebrush import utils
 
 class CSVSource(object):
@@ -95,7 +96,7 @@ class HtmlTableSource(object):
         soup = BeautifulSoup(htmlfile.read())
         if isinstance(id_or_num, int):
             table = soup.findAll('table')[id_or_num]
-        elif isinstance(id_or_num, str):
+        else:
             table = soup.find('table', id=id_or_num)
 
         # skip the necessary number of rows
@@ -105,8 +106,12 @@ class HtmlTableSource(object):
         if not fieldnames:
             self._fieldnames = [td.string
                                 for td in self._rows[0].findAll(('td','th'))]
+            skiprows += 1
         else:
             self._fieldnames = fieldnames
+
+        # skip the necessary number of rows
+        self._rows = table.findAll('tr')[skiprows:]
 
     def process_tr(self):
         for row in self._rows:
