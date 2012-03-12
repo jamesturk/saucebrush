@@ -25,8 +25,8 @@ class CSVSource(object):
     def __init__(self, csvfile, fieldnames=None, skiprows=0, **kwargs):
         import csv
         self._dictreader = csv.DictReader(csvfile, fieldnames, **kwargs)
-        for _ in xrange(skiprows):
-            self._dictreader.next()
+        for _ in range(skiprows):
+            next(self._dictreader)
 
     def __iter__(self):
         return self._dictreader
