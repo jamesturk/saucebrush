@@ -4,7 +4,8 @@ from io import StringIO
 import os
 import unittest
 
-from saucebrush.emitters import DebugEmitter, CSVEmitter, CountEmitter, SqliteEmitter
+from saucebrush.emitters import (
+    DebugEmitter, CSVEmitter, CountEmitter, SqliteEmitter, SqlDumpEmitter)
 
 class EmitterTestCase(unittest.TestCase):
 
@@ -69,6 +70,17 @@ class EmitterTestCase(unittest.TestCase):
         os.unlink(db_path)
 
         self.assertEqual(results, [('1', '2', '3')])
+
+    def test_sql_dump_emitter(self):
+
+        with closing(StringIO()) as bffr:
+
+            sde = SqlDumpEmitter(bffr, 'testtable', ('a', 'b'))
+            list(sde.attach([{'a': 1, 'b': '2'}]))
+            sde.done()
+
+            self.assertEqual(bffr.getvalue(), "INSERT INTO `testtable` (`a`,`b`) VALUES (1,'2');\n")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -180,20 +180,24 @@ class SqlDumpEmitter(Emitter):
                             table_name, '`,`'.join(fieldnames))
 
     def quote(self, item):
+
         if item is None:
             return "null"
-        elif isinstance(item, (unicode, str)):
+
+        try:
+            types = (basestring,)
+        except NameError:
+            types = (str,)
+
+        if isinstance(item, types):
             item = item.replace("\\","\\\\").replace("'","\\'").replace(chr(0),'0')
             return "'%s'" % item
-        else:
-            return "%s" % item
+
+        return "%s" % item
 
     def emit_record(self, record):
         quoted_data = [self.quote(record[field]) for field in self._fieldnames]
         self._outfile.write(self._insert_str % ','.join(quoted_data))
-
-    def done(self):
-        self._outfile.close()
 
 
 class DjangoModelEmitter(Emitter):
