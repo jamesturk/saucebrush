@@ -2,7 +2,8 @@ from __future__ import unicode_literals
 from io import BytesIO, StringIO
 import unittest
 
-from saucebrush.sources import CSVSource, FixedWidthFileSource, HtmlTableSource
+from saucebrush.sources import (
+    CSVSource, FixedWidthFileSource, HtmlTableSource, JSONSource)
 
 class SourceTestCase(unittest.TestCase):
 
@@ -43,6 +44,13 @@ class SourceTestCase(unittest.TestCase):
                          {'name':'Tim', 'month':'September', 'day':'15',
                           'year':'1999'}]
         self.assertEqual(list(source), expected_data)
+
+    def test_json_source(self):
+
+        content = StringIO("""[{"a": 1, "b": "2", "c": 3}]""")
+
+        js = JSONSource(content)
+        self.assertEqual(list(js), [{'a': 1, 'b': '2', 'c': 3}])
 
     def test_html_table_source(self):
 

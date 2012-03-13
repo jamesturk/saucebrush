@@ -226,20 +226,20 @@ class FileSource(object):
     def __iter__(self):
         # This method would be a lot cleaner with the proposed
         # 'yield from' expression (PEP 380)
-        if hasattr(self._input, '__read__'):
-            for record in self._process_file(input):
+        if hasattr(self._input, '__read__') or hasattr(self._input, 'read'):
+            for record in self._process_file(self._input):
                 yield record
-        elif isinstance(self._input, basestring):
+        elif isinstance(self._input, str):
             with open(self._input) as f:
                 for record in self._process_file(f):
                     yield record
         elif hasattr(self._input, '__iter__'):
             for el in self._input:
-                if isinstance(el, basestring):
+                if isinstance(el, str):
                     with open(el) as f:
                         for record in self._process_file(f):
                             yield record
-                elif hasattr(el, '__read__'):
+                elif hasattr(el, '__read__') or hasattr(el, 'read'):
                     for record in self._process_file(f):
                         yield record
 
@@ -256,10 +256,11 @@ class JSONSource(FileSource):
         object.
     """
 
-    def _process_file(self, file):
+    def _process_file(self, f):
+
         import json
 
-        obj = json.load(file)
+        obj = json.load(f)
 
         # If the top-level JSON object in the file is a list
         # then yield each element separately; otherwise, yield
