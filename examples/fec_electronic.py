@@ -84,7 +84,7 @@ class FECSource(object):
 
     @staticmethod
     def get_form_type(rectype):
-        for type_re, type in FECSource.FORM_MAPPING.iteritems():
+        for type_re, type in FECSource.FORM_MAPPING.items():
             if type_re.match(rectype):
                 return type
 

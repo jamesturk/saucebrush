@@ -4,8 +4,9 @@
     All sources must implement the iterable interface and return python
     dictionaries.
 """
-
+from __future__ import unicode_literals
 import string
+
 from saucebrush import utils
 
 class CSVSource(object):
@@ -25,8 +26,8 @@ class CSVSource(object):
     def __init__(self, csvfile, fieldnames=None, skiprows=0, **kwargs):
         import csv
         self._dictreader = csv.DictReader(csvfile, fieldnames, **kwargs)
-        for _ in xrange(skiprows):
-            self._dictreader.next()
+        for _ in range(skiprows):
+            next(self._dictreader)
 
     def __iter__(self):
         return self._dictreader
@@ -59,12 +60,17 @@ class FixedWidthFileSource(object):
     def __iter__(self):
         return self
 
-    def next(self):
-        line = self._fwfile.next()
+    def __next__(self):
+        line = next(self._fwfile)
         record = {}
-        for name, range_ in self._fields_dict.iteritems():
+        for name, range_ in self._fields_dict.items():
             record[name] = line[range_[0]:range_[1]].rstrip(self._fillchars)
         return record
+
+    def next(self):
+        """ Keep Python 2 next() method that defers to __next__().
+        """
+        return self.__next__()
 
 
 class HtmlTableSource(object):
@@ -86,26 +92,32 @@ class HtmlTableSource(object):
     def __init__(self, htmlfile, id_or_num, fieldnames=None, skiprows=0):
 
         # extract the table
-        from BeautifulSoup import BeautifulSoup
-        soup = BeautifulSoup(htmlfile.read())
+        from lxml.html import parse
+        doc = parse(htmlfile).getroot()
         if isinstance(id_or_num, int):
-            table = soup.findAll('table')[id_or_num]
-        elif isinstance(id_or_num, str):
-            table = soup.find('table', id=id_or_num)
+            table = doc.cssselect('table')[id_or_num]
+        else:
+            table = doc.cssselect('table#%s' % id_or_num)
+
+        table = table[0] # get the first table
 
         # skip the necessary number of rows
-        self._rows = table.findAll('tr')[skiprows:]
+        self._rows = table.cssselect('tr')[skiprows:]
 
         # determine the fieldnames
         if not fieldnames:
-            self._fieldnames = [td.string
-                                for td in self._rows[0].findAll(('td','th'))]
+            self._fieldnames = [td.text_content()
+                                for td in self._rows[0].cssselect('td, th')]
+            skiprows += 1
         else:
             self._fieldnames = fieldnames
 
+        # skip the necessary number of rows
+        self._rows = table.cssselect('tr')[skiprows:]
+
     def process_tr(self):
         for row in self._rows:
-            strings = [utils.string_dig(td) for td in row.findAll('td')]
+            strings = [td.text_content() for td in row.cssselect('td')]
             yield dict(zip(self._fieldnames, strings))
 
     def __iter__(self):
@@ -182,7 +194,7 @@ class SqliteSource(object):
         self._conn = sqlite3.connect(self._dbpath)
         self._conn.row_factory = dict_factory
         if self._conn_params:
-            for param, value in self._conn_params.iteritems():
+            for param, value in self._conn_params.items():
                 setattr(self._conn, param, value)
 
     def _process_query(self):
@@ -214,20 +226,20 @@ class FileSource(object):
     def __iter__(self):
         # This method would be a lot cleaner with the proposed
         # 'yield from' expression (PEP 380)
-        if hasattr(self._input, '__read__'):
-            for record in self._process_file(input):
+        if hasattr(self._input, '__read__') or hasattr(self._input, 'read'):
+            for record in self._process_file(self._input):
                 yield record
-        elif isinstance(self._input, basestring):
+        elif isinstance(self._input, str):
             with open(self._input) as f:
                 for record in self._process_file(f):
                     yield record
         elif hasattr(self._input, '__iter__'):
             for el in self._input:
-                if isinstance(el, basestring):
+                if isinstance(el, str):
                     with open(el) as f:
                         for record in self._process_file(f):
                             yield record
-                elif hasattr(el, '__read__'):
+                elif hasattr(el, '__read__') or hasattr(el, 'read'):
                     for record in self._process_file(f):
                         yield record
 
@@ -244,10 +256,11 @@ class JSONSource(FileSource):
         object.
     """
 
-    def _process_file(self, file):
+    def _process_file(self, f):
+
         import json
 
-        obj = json.load(file)
+        obj = json.load(f)
 
         # If the top-level JSON object in the file is a list
         # then yield each element separately; otherwise, yield

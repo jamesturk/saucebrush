@@ -3,7 +3,7 @@ from saucebrush.outputs import CSVOutput, DebugOutput
 
 def merge_columns(datasource, mapping, merge_func):
     for rowdata in datasource:
-        for to_col,from_cols in mapping.iteritems():
+        for to_col,from_cols in mapping.items():
             values = [rowdata.pop(col, None) for col in from_cols]
             rowdata[to_col] = reduce(merge_func, values)
         yield rowdata

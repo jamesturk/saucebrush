@@ -57,41 +57,42 @@ class FilterTestCase(unittest.TestCase):
 
     def assert_filter_result(self, filter_obj, expected_data):
         result = filter_obj.attach(self._simple_data())
-        self.assertEquals(list(result), expected_data)
+        self.assertEqual(list(result), expected_data)
 
     def test_reject_record(self):
         recipe = DummyRecipe()
         f = Doubler()
         result = f.attach([1,2,3], recipe=recipe)
-        result.next()       # next has to be called for attach to take effect
+        # next has to be called for attach to take effect
+        next(result)
         f.reject_record('bad', 'this one was bad')
 
         # ensure that the rejection propagated to the recipe
-        self.assertEquals('bad', recipe.rejected_record)
-        self.assertEquals('this one was bad', recipe.rejected_msg)
+        self.assertEqual('bad', recipe.rejected_record)
+        self.assertEqual('this one was bad', recipe.rejected_msg)
 
     def test_simple_filter(self):
         df = Doubler()
         result = df.attach([1,2,3])
 
         # ensure we got a generator that yields 2,4,6
-        self.assertEquals(type(result), types.GeneratorType)
-        self.assertEquals(list(result), [2,4,6])
+        self.assertEqual(type(result), types.GeneratorType)
+        self.assertEqual(list(result), [2,4,6])
 
     def test_simple_filter_return_none(self):
         cf = OddRemover()
         result = cf.attach(range(10))
 
         # ensure only even numbers remain
-        self.assertEquals(list(result), [0,2,4,6,8])
+        self.assertEqual(list(result), [0,2,4,6,8])
 
     def test_simple_yield_filter(self):
         lf = ListFlattener()
         result = lf.attach([[1],[2,3],[4,5,6]])
 
         # ensure we got a generator that yields 1,2,3,4,5,6
-        self.assertEquals(type(result), types.GeneratorType)
-        self.assertEquals(list(result), [1,2,3,4,5,6])
+        self.assertEqual(type(result), types.GeneratorType)
+        self.assertEqual(list(result), [1,2,3,4,5,6])
 
     def test_simple_field_filter(self):
         ff = FieldDoubler(['a', 'c'])
@@ -107,7 +108,7 @@ class FilterTestCase(unittest.TestCase):
         result = cf.attach(range(10))
 
         # ensure only even numbers remain
-        self.assertEquals(list(result), [0,2,4,6,8])
+        self.assertEqual(list(result), [0,2,4,6,8])
 
     ### Tests for Subrecord
 
@@ -123,7 +124,7 @@ class FilterTestCase(unittest.TestCase):
         sf = SubrecordFilter('a', NonModifyingFieldDoubler('b'))
         result = sf.attach(data)
 
-        self.assertEquals(list(result), expected)
+        self.assertEqual(list(result), expected)
 
     def test_subrecord_filter_deep(self):
         data = [{'a': {'d':[{'b': 2}, {'b': 4}]}},
@@ -137,7 +138,7 @@ class FilterTestCase(unittest.TestCase):
         sf = SubrecordFilter('a.d', NonModifyingFieldDoubler('b'))
         result = sf.attach(data)
 
-        self.assertEquals(list(result), expected)
+        self.assertEqual(list(result), expected)
 
     def test_subrecord_filter_nonlist(self):
         data = [
@@ -155,7 +156,7 @@ class FilterTestCase(unittest.TestCase):
         sf = SubrecordFilter('a.b', NonModifyingFieldDoubler('c'))
         result = sf.attach(data)
 
-        self.assertEquals(list(result), expected)
+        self.assertEqual(list(result), expected)
 
     def test_subrecord_filter_list_in_path(self):
         data = [
@@ -173,7 +174,7 @@ class FilterTestCase(unittest.TestCase):
         sf = SubrecordFilter('a.b', NonModifyingFieldDoubler('c'))
         result = sf.attach(data)
 
-        self.assertEquals(list(result), expected)
+        self.assertEqual(list(result), expected)
 
     def test_conditional_path(self):
 
@@ -202,7 +203,7 @@ class FilterTestCase(unittest.TestCase):
 
     def test_field_keeper(self):
         fk = FieldKeeper(['c'])
-        
+
         # check against expected results
         expected_data = [{'c':3}, {'c':5}, {'c':100}]
         self.assert_filter_result(fk, expected_data)
@@ -295,7 +296,7 @@ class FilterTestCase(unittest.TestCase):
         expected_data = [{'a': 77}, {'a':33}]
         result = u.attach(in_data)
 
-        self.assertEquals(list(result), expected_data)
+        self.assertEqual(list(result), expected_data)
 
     # TODO: unicode & string filter tests
 
