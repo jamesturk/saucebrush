@@ -1,4 +1,5 @@
 from saucebrush.filters import Filter
+from saucebrush.utils import FallbackCounter
 import collections
 import itertools
 import math
@@ -193,7 +194,10 @@ class Histogram(StatsFilter):
 
     def __init__(self, field, **kwargs):
         super(Histogram, self).__init__(field, **kwargs)
-        self._counter = collections.Counter()
+        if hasattr(collections, 'Counter'):
+            self._counter = collections.Counter()
+        else:
+            self._counter = FallbackCounter()
 
     def process_field(self, item):
         self._counter[self.prep_field(item)] += 1
