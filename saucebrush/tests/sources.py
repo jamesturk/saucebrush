@@ -79,7 +79,9 @@ class SourceTestCase(unittest.TestCase):
             self.assertEqual(list(hts), [{'a': '1', 'b': '2', 'c': '3'}])
 
         except ImportError:
-            self.skipTest("lxml is not installed")
+            # Python 2.6 doesn't have skipTest. We'll just suffer without it.
+            if hasattr(self, 'skipTest'):
+                self.skipTest("lxml is not installed")
 
 if __name__ == '__main__':
     unittest.main()
