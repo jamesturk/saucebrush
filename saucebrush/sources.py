@@ -270,3 +270,38 @@ class JSONSource(FileSource):
                 yield record
         else:
             yield obj
+
+class XMLSource(FileSource):
+    """ Source for reading from XML files. Use with the same kind of caution
+        that you use to approach anything written in XML.
+
+        When processing XML files, if the top-level object is a list, will
+        yield each member separately, unless the dotted path to a list is
+        included. you can also do this with a SubrecordFilter, but XML is 
+        almost never going to be useful at the top level.
+    """
+
+    def __init__(self,input,node_list=None):
+        super(XMLSource, self).__init__(input)
+        self.node_list = node_list.split('.')
+
+    def _process_file(self, f):
+
+        import xmltodict
+
+        obj = xmltodict.parse(f)
+
+        # If node list was given, walk down the tree
+
+        if self.node_list:
+            for node in self.node_list:
+                obj = obj[node] 
+
+        # If the top-level XML object in the file is a list
+        # then yield each element separately; otherwise, yield
+        # the top-level object.
+        if isinstance(obj, list):
+            for record in obj:
+                yield record
+        else:
+            yield obj
