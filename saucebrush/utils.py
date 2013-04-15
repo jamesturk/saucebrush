@@ -125,3 +125,41 @@ class RemoteFile(object):
         for line in resp:
             yield line.rstrip()
         resp.close()
+
+class ZippedFiles(object):
+    """ unpack a zipped collection of files on init.
+
+        Takes a string with file location or zipfile.ZipFile object
+
+        Best to wrap this in a Files() object, if the goal is to have a
+        linereader, as this only returns filelike objects.
+
+        if using a ZipFile object, make sure to set mode to 'a' or 'w' in order
+        to use the add() function. 
+    """
+    def __init__(self, zippedfile):
+        import zipfile
+        if type(zippedfile) == str:
+            self._zipfile = zipfile.ZipFile(zippedfile,'a')
+        else:
+            self._zipfile = zippedfile
+        self.paths = self._zipfile.namelist()
+        self.file_open_callback = None
+
+    def __iter__(self):
+        return self.filereader()
+
+    def add(self, path, dirname=None, arcname=None):
+        path_base = os.path.basename(path)
+        if dirname:
+            arcname = os.path.join(dirname,path_base)
+        if not arcname:
+            arcname = path_base
+        self._zipfile.write(path,arcname)
+        self.paths.append(path)
+
+    def filereader(self):
+        for path in iter(self.paths):
+            if self.file_open_callback:
+                self.file_open_callback(path)
+            yield self._zipfile.open(path)
