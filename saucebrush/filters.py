@@ -351,6 +351,23 @@ class FieldRenamer(Filter):
             record[dest] = record.pop(source)
         return record
 
+class FieldNameModifier(Filter):
+    """ Filter that calls a given function on a given set of fields.
+
+        FieldNameModifier(('spam','eggs'), abs) to call the abs method on the spam
+        and eggs field names in each record filtered.
+    """
+
+    def __init__(self, func):
+        super(FieldNameModifier, self).__init__()
+        self._filter_func = func
+
+    def process_record(self, record):
+        for source in record.keys():
+            dest = self._filter_func(source)
+            record[dest] = record.pop(source)
+        return record
+
 class Splitter(Filter):
     """ Filter that splits nested data into different paths.
 
