@@ -285,11 +285,17 @@ class XMLSource(FileSource):
         super(XMLSource, self).__init__(input)
         self.node_list = node_list.split('.')
 
-    def _process_file(self, f):
+    def _process_file(self, f, attr_prefix='ATTR_'):
+        """xmltodict can either return attributes of nodes as prefixed fields
+           (prefixes to avoid key collisions), or ignore them altogether.
+
+           set attr prefix to whatever you want. Setting it to False ignores
+           attributes.
+        """
 
         import xmltodict
 
-        obj = xmltodict.parse(f)
+        obj = xmltodict.parse(f,attr_prefix=attr_prefix)
 
         # If node list was given, walk down the tree
 
