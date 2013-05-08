@@ -281,9 +281,12 @@ class XMLSource(FileSource):
         almost never going to be useful at the top level.
     """
 
-    def __init__(self,input,node_list=None):
+    def __init__(self, input, node_path=None, attr_prefix='ATTR_', 
+                 postprocessor=None):
         super(XMLSource, self).__init__(input)
-        self.node_list = node_list.split('.')
+        self.node_list = node_path.split('.')
+        self.attr_prefix = attr_prefix
+        self.postprocessor = postprocessor
 
     def _process_file(self, f, attr_prefix='ATTR_'):
         """xmltodict can either return attributes of nodes as prefixed fields
@@ -295,7 +298,11 @@ class XMLSource(FileSource):
 
         import xmltodict
 
-        obj = xmltodict.parse(f,attr_prefix=attr_prefix)
+        if self.postprocessor:
+            obj = xmltodict.parse(f, attr_prefix=self.attr_prefix,
+                    postprocessor=self.postprocessor)
+        else:
+            obj = xmltodict.parse(f, attr_prefix=self.attr_prefix)
 
         # If node list was given, walk down the tree
 
