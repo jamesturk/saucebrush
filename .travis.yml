@@ -1,10 +1,9 @@
 language: python
 python:
     - "2.7"
-    - "3.3"
-install: pip install nose --use-mirrors
+    - "3.5"
+install: pip install nose 
 script: nosetests
 notifications:
     email:
-        - jturk@sunlightfoundation.com
-        - jcarbaugh@sunlightfoundation.com
+        - james.p.turk@gmail.com
