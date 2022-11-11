@@ -1,7 +1,7 @@
 import re
 import exceptions
 
-class FECSource(object):
+class FECSource:
 
     SPLIT_CHAR = '\x1c'
     FORM_FIELDS = {

@@ -1,22 +1,22 @@
 from saucebrush.filters import Filter
-from saucebrush.utils import FallbackCounter
 import collections
-import itertools
 import math
 
-def _average(values):
-    """ Calculate the average of a list of values.
 
-        :param values: an iterable of ints or floats to average
+def _average(values):
+    """Calculate the average of a list of values.
+
+    :param values: an iterable of ints or floats to average
     """
     value_count = len(values)
     if len(values) > 0:
         return sum(values) / float(value_count)
 
-def _median(values):
-    """ Calculate the median of a list of values.
 
-        :param values: an iterable of ints or floats to calculate
+def _median(values):
+    """Calculate the median of a list of values.
+
+    :param values: an iterable of ints or floats to calculate
     """
 
     count = len(values)
@@ -35,14 +35,15 @@ def _median(values):
     else:
         # even number of items, return average of middle two items
         mid = int(count / 2)
-        return sum(values[mid - 1:mid + 1]) / 2.0
+        return sum(values[mid - 1 : mid + 1]) / 2.0
+
 
 def _stddev(values, population=False):
-    """ Calculate the standard deviation and variance of a list of values.
+    """Calculate the standard deviation and variance of a list of values.
 
-        :param values: an iterable of ints or floats to calculate
-        :param population: True if values represents entire population,
-            False if it is a sample of the population
+    :param values: an iterable of ints or floats to calculate
+    :param population: True if values represents entire population,
+        False if it is a sample of the population
     """
 
     avg = _average(values)
@@ -54,11 +55,11 @@ def _stddev(values, population=False):
     # the average of the squared differences
     variance = sum(diffsq) / float(count)
 
-    return (math.sqrt(variance), variance) # stddev is sqrt of variance
+    return (math.sqrt(variance), variance)  # stddev is sqrt of variance
+
 
 class StatsFilter(Filter):
-    """ Base for all stats filters.
-    """
+    """Base for all stats filters."""
 
     def __init__(self, field, test=None):
         self._field = field
@@ -70,20 +71,21 @@ class StatsFilter(Filter):
         return record
 
     def process_field(self, record):
-        raise NotImplementedError('process_field not defined in ' +
-                                  self.__class__.__name__)
+        raise NotImplementedError(
+            "process_field not defined in " + self.__class__.__name__
+        )
 
     def value(self):
-        raise NotImplementedError('value not defined in ' +
-                                  self.__class__.__name__)
+        raise NotImplementedError("value not defined in " + self.__class__.__name__)
+
 
 class Sum(StatsFilter):
-    """ Calculate the sum of the values in a field. Field must contain either
-        int or float values.
+    """Calculate the sum of the values in a field. Field must contain either
+    int or float values.
     """
 
     def __init__(self, field, initial=0, **kwargs):
-        super(Sum, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._value = initial
 
     def process_field(self, item):
@@ -92,13 +94,14 @@ class Sum(StatsFilter):
     def value(self):
         return self._value
 
+
 class Average(StatsFilter):
-    """ Calculate the average (mean) of the values in a field. Field must
-        contain either int or float values.
+    """Calculate the average (mean) of the values in a field. Field must
+    contain either int or float values.
     """
 
     def __init__(self, field, initial=0, **kwargs):
-        super(Average, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._value = initial
         self._count = 0
 
@@ -110,15 +113,16 @@ class Average(StatsFilter):
     def value(self):
         return self._value / float(self._count)
 
-class Median(StatsFilter):
-    """ Calculate the median of the values in a field. Field must contain
-        either int or float values.
 
-        **This filter keeps a list of field values in memory.**
+class Median(StatsFilter):
+    """Calculate the median of the values in a field. Field must contain
+    either int or float values.
+
+    **This filter keeps a list of field values in memory.**
     """
 
     def __init__(self, field, **kwargs):
-        super(Median, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._values = []
 
     def process_field(self, item):
@@ -128,13 +132,14 @@ class Median(StatsFilter):
     def value(self):
         return _median(self._values)
 
+
 class MinMax(StatsFilter):
-    """ Find the minimum and maximum values in a field. Field must contain
-        either int or float values.
+    """Find the minimum and maximum values in a field. Field must contain
+    either int or float values.
     """
 
     def __init__(self, field, **kwargs):
-        super(MinMax, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._max = None
         self._min = None
 
@@ -148,18 +153,19 @@ class MinMax(StatsFilter):
     def value(self):
         return (self._min, self._max)
 
-class StandardDeviation(StatsFilter):
-    """ Calculate the standard deviation of the values in a field. Calling
-        value() will return a standard deviation for the sample. Pass
-        population=True to value() for the standard deviation of the
-        population. Convenience methods are provided for average() and
-        median(). Field must contain either int or float values.
 
-        **This filter keeps a list of field values in memory.**
+class StandardDeviation(StatsFilter):
+    """Calculate the standard deviation of the values in a field. Calling
+    value() will return a standard deviation for the sample. Pass
+    population=True to value() for the standard deviation of the
+    population. Convenience methods are provided for average() and
+    median(). Field must contain either int or float values.
+
+    **This filter keeps a list of field values in memory.**
     """
 
     def __init__(self, field, **kwargs):
-        super(StandardDeviation, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._values = []
 
     def process_field(self, item):
@@ -173,31 +179,29 @@ class StandardDeviation(StatsFilter):
         return _median(self._values)
 
     def value(self, population=False):
-        """ Return a tuple of (standard_deviation, variance).
+        """Return a tuple of (standard_deviation, variance).
 
-            :param population: True if values represents entire population,
-                False if values is a sample. Default: False
+        :param population: True if values represents entire population,
+            False if values is a sample. Default: False
         """
         return _stddev(self._values, population)
 
-class Histogram(StatsFilter):
-    """ Generate a basic histogram of the specified field. The value() method
-        returns a dict of value to occurance count mappings. The __str__ method
-        generates a basic and limited histogram useful for printing to the
-        command line. The label_length attribute determines the padding and
-        cut-off of the basic histogram labels.
 
-        **This filters maintains a dict of unique field values in memory.**
+class Histogram(StatsFilter):
+    """Generate a basic histogram of the specified field. The value() method
+    returns a dict of value to occurance count mappings. The __str__ method
+    generates a basic and limited histogram useful for printing to the
+    command line. The label_length attribute determines the padding and
+    cut-off of the basic histogram labels.
+
+    **This filters maintains a dict of unique field values in memory.**
     """
 
     label_length = 6
 
     def __init__(self, field, **kwargs):
-        super(Histogram, self).__init__(field, **kwargs)
-        if hasattr(collections, 'Counter'):
-            self._counter = collections.Counter()
-        else:
-            self._counter = FallbackCounter()
+        super().__init__(field, **kwargs)
+        self._counter = collections.Counter()
 
     def process_field(self, item):
         self._counter[self.prep_field(item)] += 1

@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "saucebrush"
+version = "0.6.0"
+description = ""
+authors = ["James Turk <dev@jamesturk.net>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+lxml = "^4.9.1"
+cssselect = "^1.2.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.0"
+flake8 = "^5.0.4"
+black = "^22.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
