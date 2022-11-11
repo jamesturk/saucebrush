@@ -1,5 +1,4 @@
 import unittest
-import operator
 import types
 from saucebrush.filters import (
     Filter,
@@ -133,7 +132,7 @@ class FilterTestCase(unittest.TestCase):
         # ensure only even numbers remain
         self.assertEqual(list(result), [0, 2, 4, 6, 8])
 
-    ### Tests for Subrecord
+    # Tests for Subrecord
 
     def test_subrecord_filter_list(self):
         data = [
@@ -209,7 +208,7 @@ class FilterTestCase(unittest.TestCase):
 
     def test_conditional_path(self):
 
-        predicate = lambda r: r["a"] == 1
+        predicate = lambda r: r["a"] == 1 # noqa
 
         # double b if a == 1, otherwise double c
         cpf = ConditionalPathFilter(predicate, FieldDoubler("b"), FieldDoubler("c"))
@@ -221,7 +220,7 @@ class FilterTestCase(unittest.TestCase):
 
         self.assert_filter_result(cpf, expected_data)
 
-    ### Tests for Generic Filters
+    # Tests for Generic Filters
 
     def test_field_modifier(self):
         # another version of FieldDoubler

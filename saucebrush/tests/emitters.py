@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 from contextlib import closing
 from io import StringIO
 import os
@@ -72,7 +71,7 @@ class EmitterTestCase(unittest.TestCase):
             import cStringIO  # if Python 2.x then use old cStringIO
 
             io = cStringIO.StringIO()
-        except:
+        except Exception:
             io = StringIO()  # if Python 3.x then use StringIO
 
         with closing(io) as output:
@@ -82,7 +81,8 @@ class EmitterTestCase(unittest.TestCase):
 
     def test_sqlite_emitter(self):
 
-        import sqlite3, tempfile
+        import sqlite3
+        import tempfile
 
         with closing(tempfile.NamedTemporaryFile(suffix=".db")) as f:
             db_path = f.name

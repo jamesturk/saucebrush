@@ -203,7 +203,7 @@ class ConditionalPathFilter(Filter):
 
 
 #####################
-## Generic Filters ##
+#  Generic Filters  #
 #####################
 
 
@@ -518,7 +518,7 @@ class UniqueIDValidator(UniqueID):
 
 
 ###########################
-## Commonly Used Filters ##
+# Commonly Used Filters   #
 ###########################
 
 
@@ -535,7 +535,7 @@ class PhoneNumberCleaner(FieldFilter):
     def __init__(self, keys, number_format="%s%s%s.%s%s%s.%s%s%s%s"):
         super(PhoneNumberCleaner, self).__init__(keys)
         self._number_format = number_format
-        self._num_re = re.compile("\d")
+        self._num_re = re.compile(r"\d")
 
     def process_field(self, item):
         nums = self._num_re.findall(item)

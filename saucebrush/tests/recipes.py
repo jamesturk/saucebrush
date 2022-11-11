@@ -1,4 +1,3 @@
-import doctest
 import unittest
 from saucebrush import Recipe, run_recipe, SaucebrushError, OvercookedError
 from saucebrush.filters import Filter

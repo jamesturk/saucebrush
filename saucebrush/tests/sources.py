@@ -1,5 +1,4 @@
-from __future__ import unicode_literals
-from io import BytesIO, StringIO
+from io import StringIO
 import unittest
 
 from saucebrush.sources import (
@@ -84,8 +83,6 @@ class SourceTestCase(unittest.TestCase):
         )
 
         try:
-
-            import lxml
 
             hts = HtmlTableSource(content, "thetable")
             self.assertEqual(list(hts), [{"a": "1", "b": "2", "c": "3"}])

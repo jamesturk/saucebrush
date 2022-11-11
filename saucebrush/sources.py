@@ -4,7 +4,6 @@
     All sources must implement the iterable interface and return python
     dictionaries.
 """
-from __future__ import unicode_literals
 import string
 
 from saucebrush import utils
