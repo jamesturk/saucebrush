@@ -11,5 +11,5 @@ emitter_suite = unittest.TestLoader().loadTestsFromTestCase(EmitterTestCase)
 recipe_suite = unittest.TestLoader().loadTestsFromTestCase(RecipeTestCase)
 stats_suite = unittest.TestLoader().loadTestsFromTestCase(StatsTestCase)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

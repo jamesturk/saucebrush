@@ -22,11 +22,11 @@ class RecipeTestCase(unittest.TestCase):
     def test_error_stream(self):
         saver = Saver()
         recipe = Recipe(Raiser(), error_stream=saver)
-        recipe.run([{'a': 1}, {'b': 2}])
+        recipe.run([{"a": 1}, {"b": 2}])
         recipe.done()
 
-        self.assertEqual(saver.saved[0]['record'], {'a': 1})
-        self.assertEqual(saver.saved[1]['record'], {'b': 2})
+        self.assertEqual(saver.saved[0]["record"], {"a": 1})
+        self.assertEqual(saver.saved[1]["record"], {"b": 2})
 
         # Must pass either a Recipe, a Filter or an iterable of Filters
         # as the error_stream argument
@@ -49,5 +49,5 @@ class RecipeTestCase(unittest.TestCase):
         self.assertEqual(saver.saved, [1])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
