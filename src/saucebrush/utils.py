@@ -67,7 +67,7 @@ def str_or_list(obj):
 #
 
 
-class Files(object):
+class Files:
     """Iterate over multiple files as a single file. Pass the paths of the
     files as arguments to the class constructor:
 
@@ -98,7 +98,7 @@ class Files(object):
                 f.close()
 
 
-class RemoteFile(object):
+class RemoteFile:
     """Stream data from a remote file.
 
     :param url: URL to remote file
@@ -114,7 +114,7 @@ class RemoteFile(object):
         resp.close()
 
 
-class ZippedFiles(object):
+class ZippedFiles:
     """unpack a zipped collection of files on init.
 
     Takes a string with file location or zipfile.ZipFile object

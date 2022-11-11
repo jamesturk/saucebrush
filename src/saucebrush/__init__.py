@@ -17,7 +17,7 @@ class OvercookedError(Exception):
     pass
 
 
-class Recipe(object):
+class Recipe:
     def __init__(self, *filter_args, **kwargs):
         self.finished = False
 

@@ -18,7 +18,7 @@ from saucebrush.filters import (
 )
 
 
-class DummyRecipe(object):
+class DummyRecipe:
     rejected_record = None
     rejected_msg = None
 

@@ -9,7 +9,7 @@ import string
 from saucebrush import utils
 
 
-class CSVSource(object):
+class CSVSource:
     """Saucebrush source for reading from CSV files.
 
     Takes an open csvfile, an optional set of fieldnames and optional number
@@ -34,7 +34,7 @@ class CSVSource(object):
         return self._dictreader
 
 
-class FixedWidthFileSource(object):
+class FixedWidthFileSource:
     """Saucebrush source for reading from fixed width field files.
 
     FixedWidthFileSource expects an open fixed width file and a tuple
@@ -73,7 +73,7 @@ class FixedWidthFileSource(object):
         return self.__next__()
 
 
-class HtmlTableSource(object):
+class HtmlTableSource:
     """Saucebrush source for reading data from an HTML table.
 
     HtmlTableSource expects an open html file, the id of the table or a
@@ -126,7 +126,7 @@ class HtmlTableSource(object):
         return self.process_tr()
 
 
-class DjangoModelSource(object):
+class DjangoModelSource:
     """Saucebrush source for reading data from django models.
 
     DjangoModelSource expects a django settings file, app label, and model
@@ -148,7 +148,7 @@ class DjangoModelSource(object):
         return iter(self._data)
 
 
-class MongoDBSource(object):
+class MongoDBSource:
     """Source for reading from a MongoDB database.
 
     The record dict is populated with records matching the spec
@@ -181,7 +181,7 @@ def dict_factory(cursor, row):
     return d
 
 
-class SqliteSource(object):
+class SqliteSource:
     """Source that reads from a sqlite database.
 
     The record dict is populated with the results from the
@@ -221,7 +221,7 @@ class SqliteSource(object):
         self._conn.close()
 
 
-class FileSource(object):
+class FileSource:
     """Base class for sources which read from one or more files.
 
     Takes as input a file-like, a file path, a list of file-likes,

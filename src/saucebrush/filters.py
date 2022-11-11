@@ -16,7 +16,7 @@ import time
 ######################
 
 
-class Filter(object):
+class Filter:
     """ABC for filters that operate on records.
 
     All derived filters must provide a process_record(self, record) that
