@@ -1,10 +1,5 @@
-import collections
 import os
-
-try:
-    from urllib.request import urlopen  # attemp py3 first
-except ImportError:
-    from urllib2 import urlopen  # fallback to py2
+from urllib.request import urlopen
 
 """
     General utilities used within saucebrush that may be useful elsewhere.
@@ -70,24 +65,6 @@ def str_or_list(obj):
 #
 # utility classes
 #
-
-
-class FallbackCounter(collections.defaultdict):
-    """Python 2.6 does not have collections.Counter.
-    This is class that does the basics of what we need from Counter.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(FallbackCounter, self).__init__(int)
-
-    def most_common(n=None):
-
-        l = sorted(self.items(), cmp=lambda x, y: cmp(x[1], y[1]))
-
-        if n is not None:
-            l = l[:n]
-
-        return l
 
 
 class Files(object):

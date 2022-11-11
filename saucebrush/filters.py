@@ -221,7 +221,7 @@ class FieldModifier(FieldFilter):
     def process_field(self, item):
         return self._filter_func(item)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s( %s, %s )" % (
             self.__class__.__name__,
             str(self._target_keys),
@@ -263,7 +263,7 @@ class FieldRemover(Filter):
             record.pop(key, None)
         return record
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s( %s )" % (self.__class__.__name__, str(self._target_keys))
 
 
@@ -291,7 +291,7 @@ class FieldMerger(Filter):
             record[to_col] = self._merge_func(*values)
         return record
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s( %s, %s )" % (
             self.__class__.__name__,
             str(self._field_mapping),
@@ -517,36 +517,6 @@ class UniqueIDValidator(UniqueID):
     validator = True
 
 
-class UnicodeFilter(Filter):
-    """Convert all str elements in the record to Unicode."""
-
-    def __init__(self, encoding="utf-8", errors="ignore"):
-        super(UnicodeFilter, self).__init__()
-        self._encoding = encoding
-        self._errors = errors
-
-    def process_record(self, record):
-        for key, value in record.items():
-            if isinstance(value, str):
-                record[key] = unicode(value, self._encoding, self._errors)
-            elif isinstance(value, unicode):
-                record[key] = value.decode(self._encoding, self._errors)
-        return record
-
-
-class StringFilter(Filter):
-    def __init__(self, encoding="utf-8", errors="ignore"):
-        super(StringFilter, self).__init__()
-        self._encoding = encoding
-        self._errors = errors
-
-    def process_record(self, record):
-        for key, value in record.items():
-            if isinstance(value, unicode):
-                record[key] = value.encode(self._encoding, self._errors)
-        return record
-
-
 ###########################
 ## Commonly Used Filters ##
 ###########################
@@ -601,7 +571,7 @@ class NameCleaner(Filter):
 
     # first middle? last suffix?
     FIRST_LAST = re.compile(
-        """^\s*(?:(?P<firstname>\w+)(?:\.?)
+        r"""^\s*(?:(?P<firstname>\w+)(?:\.?)
                                 \s+(?:(?P<middlename>\w+)\.?\s+)?
                                 (?P<lastname>[A-Za-z'-]+))
                                 (?:\s+(?P<suffix>JR\.?|II|III|IV))?
@@ -611,7 +581,7 @@ class NameCleaner(Filter):
 
     # last, first middle? suffix?
     LAST_FIRST = re.compile(
-        """^\s*(?:(?P<lastname>[A-Za-z'-]+),
+        r"""^\s*(?:(?P<lastname>[A-Za-z'-]+),
                                 \s+(?P<firstname>\w+)(?:\.?)
                                 (?:\s+(?P<middlename>\w+)\.?)?)
                                 (?:\s+(?P<suffix>JR\.?|II|III|IV))?
