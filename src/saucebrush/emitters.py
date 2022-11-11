@@ -45,7 +45,7 @@ class DebugEmitter(Emitter):
     """
 
     def __init__(self, outfile=None):
-        super(DebugEmitter, self).__init__()
+        super().__init__()
         if not outfile:
             import sys
 
@@ -68,7 +68,7 @@ class CountEmitter(Emitter):
 
     def __init__(self, every=1000, of=None, outfile=None, format=None):
 
-        super(CountEmitter, self).__init__()
+        super().__init__()
 
         if not outfile:
             import sys
@@ -108,7 +108,7 @@ class CSVEmitter(Emitter):
     """
 
     def __init__(self, csvfile, fieldnames):
-        super(CSVEmitter, self).__init__()
+        super().__init__()
         import csv
 
         self._dictwriter = csv.DictWriter(csvfile, fieldnames)
@@ -131,7 +131,7 @@ class SqliteEmitter(Emitter):
     """
 
     def __init__(self, dbname, table_name, fieldnames=None, replace=False, quiet=False):
-        super(SqliteEmitter, self).__init__()
+        super().__init__()
         import sqlite3
 
         self._conn = sqlite3.connect(dbname)
@@ -182,7 +182,7 @@ class SqlDumpEmitter(Emitter):
     """
 
     def __init__(self, outfile, table_name, fieldnames):
-        super(SqlDumpEmitter, self).__init__()
+        super().__init__()
         self._fieldnames = fieldnames
         if not outfile:
             import sys
@@ -228,7 +228,7 @@ class DjangoModelEmitter(Emitter):
     """
 
     def __init__(self, dj_settings, app_label, model_name):
-        super(DjangoModelEmitter, self).__init__()
+        super().__init__()
         from saucebrush.utils import get_django_model
 
         self._dbmodel = get_django_model(dj_settings, app_label, model_name)
@@ -256,7 +256,7 @@ class MongoDBEmitter(Emitter):
         drop_collection=False,
         conn=None,
     ):
-        super(MongoDBEmitter, self).__init__()
+        super().__init__()
 
         from pymongo.database import Database
 
@@ -288,7 +288,7 @@ class LoggingEmitter(Emitter):
     import logging
 
     def __init__(self, logger, msg_template, level=logging.DEBUG):
-        super(LoggingEmitter, self).__init__()
+        super().__init__()
         self.logger = logger
         self.msg_template = msg_template
         self.level = level

@@ -85,7 +85,7 @@ class Sum(StatsFilter):
     """
 
     def __init__(self, field, initial=0, **kwargs):
-        super(Sum, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._value = initial
 
     def process_field(self, item):
@@ -101,7 +101,7 @@ class Average(StatsFilter):
     """
 
     def __init__(self, field, initial=0, **kwargs):
-        super(Average, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._value = initial
         self._count = 0
 
@@ -122,7 +122,7 @@ class Median(StatsFilter):
     """
 
     def __init__(self, field, **kwargs):
-        super(Median, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._values = []
 
     def process_field(self, item):
@@ -139,7 +139,7 @@ class MinMax(StatsFilter):
     """
 
     def __init__(self, field, **kwargs):
-        super(MinMax, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._max = None
         self._min = None
 
@@ -165,7 +165,7 @@ class StandardDeviation(StatsFilter):
     """
 
     def __init__(self, field, **kwargs):
-        super(StandardDeviation, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._values = []
 
     def process_field(self, item):
@@ -200,7 +200,7 @@ class Histogram(StatsFilter):
     label_length = 6
 
     def __init__(self, field, **kwargs):
-        super(Histogram, self).__init__(field, **kwargs)
+        super().__init__(field, **kwargs)
         self._counter = collections.Counter()
 
     def process_field(self, item):

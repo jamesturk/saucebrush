@@ -68,10 +68,6 @@ class FixedWidthFileSource:
             record[name] = line[range_[0] : range_[1]].rstrip(self._fillchars)
         return record
 
-    def next(self):
-        """Keep Python 2 next() method that defers to __next__()."""
-        return self.__next__()
-
 
 class HtmlTableSource:
     """Saucebrush source for reading data from an HTML table.
@@ -293,7 +289,7 @@ class XMLSource(FileSource):
     """
 
     def __init__(self, input, node_path=None, attr_prefix="ATTR_", postprocessor=None):
-        super(XMLSource, self).__init__(input)
+        super().__init__(input)
         self.node_list = node_path.split(".")
         self.attr_prefix = attr_prefix
         self.postprocessor = postprocessor

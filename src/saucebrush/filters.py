@@ -75,7 +75,7 @@ class FieldFilter(Filter):
     """
 
     def __init__(self, keys):
-        super(FieldFilter, self).__init__()
+        super().__init__()
         self._target_keys = utils.str_or_list(keys)
 
     def process_record(self, record):
@@ -131,7 +131,7 @@ class ConditionalFilter(YieldFilter):
 
 class ValidationError(Exception):
     def __init__(self, record):
-        super(ValidationError, self).__init__(repr(record))
+        super().__init__(repr(record))
         self.record = record
 
 
@@ -215,7 +215,7 @@ class FieldModifier(FieldFilter):
     """
 
     def __init__(self, keys, func):
-        super(FieldModifier, self).__init__(keys)
+        super().__init__(keys)
         self._filter_func = func
 
     def process_field(self, item):
@@ -237,7 +237,7 @@ class FieldKeeper(Filter):
     """
 
     def __init__(self, keys):
-        super(FieldKeeper, self).__init__()
+        super().__init__()
         self._target_keys = utils.str_or_list(keys)
 
     def process_record(self, record):
@@ -255,7 +255,7 @@ class FieldRemover(Filter):
     """
 
     def __init__(self, keys):
-        super(FieldRemover, self).__init__()
+        super().__init__()
         self._target_keys = utils.str_or_list(keys)
 
     def process_record(self, record):
@@ -277,7 +277,7 @@ class FieldMerger(Filter):
     """
 
     def __init__(self, mapping, merge_func, keep_fields=False):
-        super(FieldMerger, self).__init__()
+        super().__init__()
         self._field_mapping = mapping
         self._merge_func = merge_func
         self._keep_fields = keep_fields
@@ -313,7 +313,7 @@ class FieldAdder(Filter):
     """
 
     def __init__(self, field_name, field_value, replace=True):
-        super(FieldAdder, self).__init__()
+        super().__init__()
         self._field_name = field_name
         self._field_value = field_value
         if hasattr(self._field_value, "__iter__"):
@@ -348,7 +348,7 @@ class FieldCopier(Filter):
     """
 
     def __init__(self, copy_mapping):
-        super(FieldCopier, self).__init__()
+        super().__init__()
         self._copy_mapping = copy_mapping
 
     def process_record(self, record):
@@ -365,7 +365,7 @@ class FieldRenamer(Filter):
     """
 
     def __init__(self, rename_mapping):
-        super(FieldRenamer, self).__init__()
+        super().__init__()
         self._rename_mapping = rename_mapping
 
     def process_record(self, record):
@@ -383,7 +383,7 @@ class FieldNameModifier(Filter):
     """
 
     def __init__(self, func):
-        super(FieldNameModifier, self).__init__()
+        super().__init__()
         self._filter_func = func
 
     def process_record(self, record):
@@ -405,7 +405,7 @@ class Splitter(Filter):
     """
 
     def __init__(self, split_mapping):
-        super(Splitter, self).__init__()
+        super().__init__()
         self._split_mapping = split_mapping
 
     def process_record(self, record):
@@ -449,7 +449,7 @@ class Flattener(FieldFilter):
     """
 
     def __init__(self, keys):
-        super(Flattener, self).__init__(keys)
+        super().__init__(keys)
 
     def process_field(self, item):
         result = []
@@ -463,7 +463,7 @@ class Flattener(FieldFilter):
 
 class DictFlattener(Filter):
     def __init__(self, keys, separator="_"):
-        super(DictFlattener, self).__init__()
+        super().__init__()
         self._keys = utils.str_or_list(keys)
         self._separator = separator
 
@@ -475,7 +475,7 @@ class Unique(ConditionalFilter):
     """Filter that ensures that all records passing through are unique."""
 
     def __init__(self):
-        super(Unique, self).__init__()
+        super().__init__()
         self._seen = set()
 
     def test_record(self, record):
@@ -499,7 +499,7 @@ class UniqueID(ConditionalFilter):
     """
 
     def __init__(self, field="id", *args):
-        super(UniqueID, self).__init__()
+        super().__init__()
         self._seen = set()
         self._id_fields = [field]
         self._id_fields.extend(args)
@@ -533,7 +533,7 @@ class PhoneNumberCleaner(FieldFilter):
     """
 
     def __init__(self, keys, number_format="%s%s%s.%s%s%s.%s%s%s%s"):
-        super(PhoneNumberCleaner, self).__init__(keys)
+        super().__init__(keys)
         self._number_format = number_format
         self._num_re = re.compile(r"\d")
 
@@ -551,7 +551,7 @@ class DateCleaner(FieldFilter):
     """
 
     def __init__(self, keys, from_format, to_format):
-        super(DateCleaner, self).__init__(keys)
+        super().__init__(keys)
         self._from_format = from_format
         self._to_format = to_format
 
@@ -590,7 +590,7 @@ class NameCleaner(Filter):
     )
 
     def __init__(self, keys, prefix="", formats=None, nomatch_name=None):
-        super(NameCleaner, self).__init__()
+        super().__init__()
         self._keys = utils.str_or_list(keys)
         self._name_prefix = prefix
         self._nomatch_name = nomatch_name
